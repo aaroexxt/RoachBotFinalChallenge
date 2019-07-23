@@ -26,6 +26,22 @@ extern "C" {
 
 #define SDA_LAT LATBbits.LATB12
 
+enum {
+	INPUT,
+	OUTPUT
+};
+
+enum{
+	HIGH,
+	LOW
+};
+
+enum{
+
+	SCL,
+	SDA
+};
+
 
 int IO_setPortDirection(int pin, int direction);
 // setting the port's value to input or output
