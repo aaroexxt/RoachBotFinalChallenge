@@ -22,7 +22,7 @@ void initTurn(int degrees){
 int turn(void){
     gyroAngle = 0; //will change to update gyroAngle
     currentPos += gyroAngle;
-    if(abs(setpoint - currentPos) < 10){
+    if(setpoint - currentPos < 10 && setpoint - currentPos > - 10){
         count++;
     } else {
         count = 0;
