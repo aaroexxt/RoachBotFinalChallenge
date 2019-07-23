@@ -5,7 +5,7 @@
  * Created on July 5, 2019, 1:32 PM
  */
 
-
+//this enum stores the two constants for the IO_setPortDirection function
 enum {
 	INPUT,
 	OUTPUT
@@ -16,7 +16,12 @@ enum{
 	LOW
 }
 
-int setPortDirection(short pinNumber, int direction){
+
+/** @param[in] port ID number(pinNumber) and INPUT or OUTPUT assignment (direction). 
+pinNumber equals to 1 if direction equals to 1, otherwise pinNumber equals to 0.
+setting the port's value to input or output
+*/
+int IO_setPortDirection(short pinNumber, int direction){
 
 	if (direction == INPUT){
 
@@ -29,11 +34,13 @@ int setPortDirection(short pinNumber, int direction){
 
 }
 
-// setting the port's value to input or output
+/** @param[in] port ID number(pinNumber) and electricity value 1 or 0 (newValue). 
+pinNumber equals to 1 if newValue equals to HIGH, otherwise pinNumber equals to 0.
+set the value to either 1 (high voltage) or 0 (low voltage)
+*/
 
+int IO_setPort(short pinNumber, int newValue){
 
-int setPort(short pinNumber, int newValue){
-// set the value to either 1 (high voltage) or 0 (low voltage)
 	if (newValue == HIGH){
 
 		pinNumber = 1;
@@ -44,7 +51,11 @@ int setPort(short pinNumber, int newValue){
 	}
 }
 
-int readPort(short pinNumber){
+/** @param[in] port ID number(pinNumber), read from the input value. 
+Return (1) if pinNumber equals to 1, otherwise returns 0.
+*/
+
+int IO_readPort(short pinNumber){
 
 	if(pinNumber == 1){
 
@@ -56,10 +67,13 @@ int readPort(short pinNumber){
 	}
 
 }
-// read from the input value
 
+/** @param[in] port ID number(pinNumber).
+Return (1) if pinNumber equals to 1, otherwise returns 0.
+check if the input value is an input or output
+*/
 
-char checkInputValue(short pinNumber){
+char IO_checkInputValue(short pinNumber){
 
 	if (pinNumber == 1){
 
@@ -71,6 +85,5 @@ char checkInputValue(short pinNumber){
 		return 0;
 	}
 }
-// check if the input value is an input or output
 
 
