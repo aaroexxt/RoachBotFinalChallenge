@@ -20,6 +20,7 @@
 #include "JAADMain.h"
 #include "JAADI2CLib.h"
 #include "JAADMOVLib.h"
+#include "JAADIOLib.h"
 #include "Roach_Events.h"
 
 
