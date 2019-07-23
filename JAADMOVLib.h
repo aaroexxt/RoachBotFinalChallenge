@@ -16,7 +16,7 @@ char isTurnFinished(void);
 
 void initFwd(int distance);
 
-void fwd(void);
+int fwd(void);
 
 char isFwdFinished(void);
 

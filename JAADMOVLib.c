@@ -6,35 +6,68 @@
  */
 
 #include "JAADMOVLib.h"
-#define p 0.2
-int currentPos = 0;
+#define turnP 0.2
+#define driveP 0.2
+int turnCurrentPos = 0;
 int gyroAngle = 0;
-int setpoint = 0;
-char isFinished = 0;
-int count = 0;
+int turnSetpoint = 0;
+char isFinishedTurn = 0;
+int turnCount = 0;
 
 void initTurn(int degrees){
-    count = 0;
-    currentPos = 0;
-    setpoint = degrees;
-    isFinished = 0;
+    turnCount = 0;
+    turnCurrentPos = 0;
+    turnSetpoint = degrees;
+    isFinishedTurn = 0;
 }
 int turn(void){
     gyroAngle = 0; //will change to update gyroAngle
-    currentPos += gyroAngle;
-    if(setpoint - currentPos < 10 && setpoint - currentPos > - 10){
-        count++;
+    turnCurrentPos += gyroAngle;
+    if(turnSetpoint - turnCurrentPos < 10 && turnSetpoint - turnCurrentPos > - 10){
+        turnCount++;
     } else {
-        count = 0;
+        turnCount = 0;
     }
-    if(count > 10){
-        isFinished = 1;
+    if(turnCount > 10){
+        isFinishedTurn = 1;
         return 0;
     } else{
-        return p * (setpoint - currentPos);
+        return turnP * (turnSetpoint - turnCurrentPos);
     }
 }
 
 char isTurnFinished(void){
-    return isFinished;
+    return isFinishedTurn;
+}
+
+int driveCurrentPos = 0;
+int acc = 0;
+int vel = 0;
+int driveSetpoint = 0;
+char isFinishedDrive = 0;
+int driveCount = 0;
+
+void initFwd(int distance){
+    vel = 0;
+    driveSetpoint = distance;
+    driveCount = 0;
+    driveCurrentPos = 0;
+    isFinishedDrive = 0;
+}
+
+int fwd(void){
+    acc = 0; //change to accelerometer value
+    vel += acc;
+    driveCurrentPos += vel;
+    if(driveSetpoint - driveCurrentPos < 10 && driveSetpoint - driveCurrentPos > -10){
+        driveCount++;
+    } else {
+        driveCount = 0;
+    }
+    if(driveCount > 10){
+        isFinishedDrive = 1;
+        return 0;
+    } else {
+        return driveP * (driveSetpoint - driveCurrentPos);
+    }
 }
