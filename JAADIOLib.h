@@ -27,23 +27,22 @@ extern "C" {
 #define SDA_LAT LATBbits.LATB12
 
 
-int IO_setPortDirection(short pinNumber, int direction);
+int IO_setPortDirection(int pin, int direction);
 // setting the port's value to input or output
 /* example use
 setPortDirection(SCL_TRIS, 0);
 */
 
 
-int IO_setPort(short pinNumber, char newValue);
+int IO_setPort(int pin, int newValue);
 // set the value to either 1 (high voltage) or 0 (low voltage)
 
 
-char IO_readPort(short pinNumber);
+int IO_readPort(int pin);
 // read from the input value
 
 
-char IO_checkInputValue(short pinNumber);
-// check if the input value is an input or output
+
 
 
 

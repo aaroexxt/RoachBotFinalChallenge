@@ -30,14 +30,14 @@ setting the port's value to input or output
 */
 int IO_setPortDirection(int pin, int direction){
 	if (pin == SDA) {
-		if(direction == HIGH){
+		if(direction == INPUT){
 			SDA_TRIS = 1;
 		} else {
 			SDA_TRIS = 0;
 		}
 	}
 	else{
-		if (direction == HIGH){
+		if (direction == INPUT){
 
 			SCL_TRIS = 1;
 		}
