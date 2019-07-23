@@ -3,9 +3,9 @@
  * Author: Aaron Becker
  *
  * Created on July 5, 2019, 1:32 PM
+ * Big credit to the Arduino TWI and Wire libraries for their reference code :)
  */
 
-//SOmeone please help i am writing this completely custom lol
 
 
 /*
@@ -25,6 +25,7 @@ REQUIRES PULL UP RESISTORS
 
 */
 
+//require the i2c lib
 #include "JAADI2CLib.h"
 #include "JAADIOLib.h"
 
@@ -153,15 +154,99 @@ char read_bit(char& value) { //it's pointer time bois
 
 
 /******
-MEDIUM LOW LEVEL FUNCTIONS
+* MEDIUM LOW LEVEL FUNCTIONS
+* yo these functions basically use the lowest level to build up to bytes (which will then be used in the frame)
 ******/
+
+//Write a single byte (will return NACK bit so we'll know if it returned successfully)
 char write_byte(unsigned char byte, char& nack) {
 	for (int i = 0; i < 8; i++) { //for each bit in the byte
-	  if (!write_bit(byte & 0x80)) return (false);
-	  byte <<= 1;
+		if (!write_bit(byte & 0x80)) { //only take the MSB via bitwise and
+			return false;
+		}
+	  	byte <<= 1; //bitshift it left (will wrap, but that's ok)
 	}
 	return (read_bit(nack));
 }
+
+char read_byte(unsigned char& byte, char ack) {
+    unsigned char value;
+    byte = 0;
+    for (int i = 0; i < 8; i++) {
+		if (!read_bit(value)) {
+			return (false); //if failed to read just return false
+		}
+		byte = (byte << 1) | value; //bitshift it to the proper place and bitwise OR with value to return current full byte (LSB to MSB)
+    }
+    return (write_bit(!ack)); //return if the device will accept a ACK bit
+}
+
+/******
+* HIGH LOW LEVEL FUNCTIONS
+* Uses medium low level functions to write long strings of data, or read similarly long strings
+******/
+
+int read(unsigned int addr, void* buf, int count) { //count buffer in BYTES
+    // Check if repeated start condition should be generated
+    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
+    	return (-1);
+    }
+    m_start = false;
+
+    // Address device with read request and check that it acknowledges
+    char nack;
+    if (!write_byte(addr | 1, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
+
+    // Read bytes and acknowledge until required size
+    unsigned char* bp = (unsigned char*) buf;
+    int size = count;
+    while (size--) { //subtract a single bit from size
+      char ack = (size != 0); //if size is not 0, then it is 1 (which is the goal)
+      unsigned char data;
+      if (!read_byte(data, ack)) { //if reading byte returns an error then exit
+      	return (-1);
+      }
+      *bp++ = data; //add to the buffer
+    }
+    return count; //return the amount of bytes read
+}
+
+int write(uint8_t addr, void* buf, int count) { //count in BYTES
+    // Check if repeated start condition should be generated
+    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
+    	return (-1);
+    }
+    m_start = false;
+
+    // Address device with read request and check that it acknowledges
+    char nack;
+    if (!write_byte(addr | 1, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
+
+    // Sanity check the size of count and buf to write
+    if (count == 0 || sizeof(buf) == 0) {
+    	return (0);
+    }
+
+    // Write given buffer to device
+    int count = 0;
+    int i = 0;
+    for(i=0; i<count; i++) {
+
+    	///THIS IS VERY NOT DONE PLS FINISH
+      const uint8_t* bp = (const uint8_t*) vp->buf;
+      size_t size = vp->size;
+      count += size;
+      while (size--) {
+	uint8_t data = *bp++;
+	if (!write_byte(data, nack) || nack) return (-1);
+      }
+    }
+    return (count);
+  }
 
 
 
