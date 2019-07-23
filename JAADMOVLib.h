@@ -5,8 +5,8 @@
  * Created on July 22, 2019, 4:58 PM
  */
 
-#ifndef JAADSM_H
-#define	JAADSM_H
+#ifndef JAADMOVLib
+#define	JAADMOVLib
 
 void initTurn(int degrees);
 
