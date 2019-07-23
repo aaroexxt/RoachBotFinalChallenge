@@ -1,5 +1,9 @@
-#include <stdio.h>
+//File: LocateExtractionPoint.c
++
 
+#include <stdio.h>
+#include "JAADI2CLib.h"
+#include "JAADMOVLib.h"
 #include "Roach_Events.h"
 #include "roach.h"
 #include "Roach_Top_Level_SM.h"
@@ -17,11 +21,16 @@ enum {
 
 //Enum for Aligning Substates
 enum {
-    
+    TurnZero,
+    DriveForward,
+    Reverse,
+    TurnNinety
 };
 
 int current_state;
 int substate_state;
+
+
 
 /* This function initializes the roach state machine.
  * At a minimum, this requires setting the first state.
@@ -40,7 +49,14 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event)
     switch (current_state) {
         case Aligning:
             switch (substate_state) {
-                
+        case TurnZero:
+        printf("Turn Zero");
+        case DriveForward:
+        printf("DriveForward");
+        case Reverse:
+        printf("Reverse");
+        case TurnNinty:
+        printf("TurnNinty");
             }
             break;
         case Orienting:
