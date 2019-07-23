@@ -16,7 +16,7 @@ enum {
     NavigateObstacleField,
     CrossNarrowBridge,
     LocateExtractionPoint,
-    Idle,
+    Idle
 };
 
 int current_state;

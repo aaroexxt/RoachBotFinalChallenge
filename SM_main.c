@@ -17,7 +17,9 @@
 #include "roach.h"
 #include "timers.h"
 #include "Roach_Top_Level_SM.h"
-#include "JAADSM.h"
+#include "JAADMain.h"
+#include "JAADI2CLib.h"
+#include "JAADMOVLib.h"
 #include "Roach_Events.h"
 
 
@@ -76,8 +78,6 @@ void PrintEvent(Event event)
 int main(void)
 {
     
-
-
     //These calls configure the Pic32 so that it can interact with the Roach hardware
     BOARD_Init();
     Roach_Init();
