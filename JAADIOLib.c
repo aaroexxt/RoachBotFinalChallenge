@@ -14,6 +14,8 @@
 pinNumber equals to 1 if direction equals to 1, otherwise pinNumber equals to 0.
 setting the port's value to input or output
 */
+
+#include "JAADIOLib.h"
 int IO_setPortDirection(int pin, int direction){
 	if (pin == SDA) {
 		if(direction == INPUT){

@@ -11,6 +11,7 @@
 
 //Microchip's specialized library
 #include <xc.h>
+#include <peripheral/ports.h>
 
 //A library to use the uc32 board
 #include "BOARD.h"
