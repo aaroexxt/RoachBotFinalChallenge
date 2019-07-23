@@ -117,6 +117,10 @@ char I2C_InitSensors() {
 	return true;
 }
 
+void setupAccel() {
+	
+}
+
 /********
 * ALL LOW LEVEL FRAME CONDITIONS/ROUTINES
 * all frame conditions return 1 for success 0 for fail
