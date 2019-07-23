@@ -65,23 +65,124 @@ int I2C_Init(unsigned int speed) {
 	}
 }
 
-//Basic conditions for frames
+/********
+* ALL LOW LEVEL FRAME CONDITIONS/ROUTINES
+* all frame conditions return 1 for success 0 for fail
+*******/
 
-//return 1 for success 0 for fail
+//Start condition, beginning of frame
 char startCondition() {
-	SDAHIGH(); //pulse sda
-	if (checkLat(SDAPIN)) {
+	IO_setPortDirection(SDA, INPUT); //set sda to input
+	if (IO_readPort(SDA) == 0) { //NACK recieved which is a rip
 		return false;
 	}
-	SDALOW();
-	delayUS(T1);
-	SCLHIGH(); //pulse scl
-	SCLLOW();
-
-
+	SDALOW(); //set sda low
+	delayUS(T1); //delay 4uS
+	SCLLOW(); //set scl low
+	return true;
 }
 
-//Low level functions
+//Repeated start condition
+char repeated_start_condition() {
+	delayMicroseconds(T1);
+	IO_setPortDirection(SDA, INPUT);
+	if (IO_readPort(SDA) == 0) { //NACK recieved which is a rip
+		return false;
+	}
+	IO_setPortDirection(SCL, INPUT);
+	delayMicroseconds(T2);
+	SDALOW();
+	delayMicroseconds(T1);
+	SCLLOW();
+	return (true);
+}
+
+//Allows clock stretching detection using pins
+char clock_stretching() {
+	for (int retry = 0; retry < CLOCK_STRETCHING_RETRY_MAX; retry++) {
+		if (IO_readPort(SCL)) { //wait for ACK
+			return true;
+		}
+		delayMicroseconds(T1);
+	}
+	return (false);
+}
+
+//End of frame condition
+char stop_condition() {
+    delayMicroseconds(T1);
+    SDALOW();
+    IO_setPortDirection(SCL, INPUT);
+    delayMicroseconds(T1);
+    if (!clock_stretching()) return (false); //check for clock stretching
+    IO_setPortDirection(SDA, INPUT);
+
+    return (IO_readPort(SDA) == 0); //check if sda is being pulled low
+}
+
+//Write a single bit to device
+char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
+    if (value == 1) {
+    	IO_setPortDirection(SDA, INPUT);
+    } else {
+    	SDALOW();
+    }
+    delayMicroseconds(T2);
+    IO_setPortDirection(SCL, INPUT);
+    delayMicroseconds(T1);
+    if (!clock_stretching()) {
+    	return false;
+    }
+    SCLLOW();
+    return (true);
+}
+
+//Read a single bit from device
+char read_bit(char& value) { //it's pointer time bois
+    IO_setPortDirection(SDA, INPUT);
+    delayMicroseconds(T2);
+    IO_setPortDirection(SCL, INPUT);
+    delayMicroseconds(T1);
+    if (!clock_stretching()) {
+    	return false;
+    }
+    value = IO_readPort(SDA);
+    SCLLOW();
+    return true;
+}
+
+
+/******
+MEDIUM LOW LEVEL FUNCTIONS
+******/
+char write_byte(unsigned char byte, char& nack) {
+	for (int i = 0; i < 8; i++) { //for each bit in the byte
+	  if (!write_bit(byte & 0x80)) return (false);
+	  byte <<= 1;
+	}
+	return (read_bit(nack));
+}
+
+
+
+
+/******
+LOWEST LEVEL FUNCTIONS
+******/
+
+void SDAHIGH() {} //Pullup resistor should take care of this
+void SCLHIGH() {} //same with this
+
+void SDALOW() {
+	IO_setPortDirection(SDA, OUTPUT);
+	IO_setPort(SDA, LOW);
+}
+
+void SCLLOW() {
+	IO_setPortDirection(SCL, OUTPUT);
+	IO_setPort(SCL, LOW);
+}
+
 void delayUS(UINT32 delay_us) {
    UINT32 DelayStartTime;
    
