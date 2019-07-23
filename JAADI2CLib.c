@@ -4,6 +4,11 @@
  *
  * Created on July 5, 2019, 1:32 PM
  * Big credit to the Arduino TWI and Wire libraries for their reference code :)
+ * 
+ * Good links:
+ * https://github.com/mikaelpatel/Arduino-TWI/blob/master/src/Software/TWI.h
+ * https://github.com/mdunne/ANIMA/blob/master/code/Small_scale/I2C_Driver.X/I2C_Driver_test.c
+ * http://www.circuitbasics.com/basics-of-the-i2c-communication-protocol/
  */
 
 
@@ -56,14 +61,28 @@ char m_start;
 char I2C_initted = FALSE;
 
 //Top level abstractions
-int I2C_Init(unsigned int speed) {
+char I2C_Init() {
 	if (!I2C_initted) {
 		I2C_initted = true;
-		//Set SCL/SDA to OUTPUTS
-		//Set SCL/SDA to HIGH
-		if (IO_checkLAT(SCLLAT))
-
+		printf("JAADi2c INIT recieved");
+		IO_setPortDirection(SDA, INPUT); //allow both to be pulled high
+		IO_setPortDirection(SCL, INPUT);
+	} else {
+		return false;
 	}
+	return true;
+}
+
+char I2C_InitSensors() {
+	// soft reset & reboot accel/gyro
+	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG8, 0x05);
+
+	// soft reset & reboot magnetometer
+  	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C);
+
+  	delayMS(10); //wait 10ms
+
+
 }
 
 /********
@@ -73,8 +92,8 @@ int I2C_Init(unsigned int speed) {
 
 //Start condition, beginning of frame
 char startCondition() {
-	IO_setPortDirection(SDA, INPUT); //set sda to input
-	if (IO_readPort(SDA) == 0) { //NACK recieved which is a rip
+	IO_setPortDirection(SDA, INPUT); //set sda to input so that it gets pulled high
+	if (IO_readPort(SDA) == 0) { //Other device is pulling it low for some reason?
 		return false;
 	}
 	SDALOW(); //set sda low
@@ -116,7 +135,7 @@ char stop_condition() {
     IO_setPortDirection(SCL, INPUT);
     delayMicroseconds(T1);
     if (!clock_stretching()) return (false); //check for clock stretching
-    IO_setPortDirection(SDA, INPUT);
+    IO_setPortDirection(SDA, INPUT); //allow sda to go high
 
     return (IO_readPort(SDA) == 0); //check if sda is being pulled low
 }
@@ -124,17 +143,17 @@ char stop_condition() {
 //Write a single bit to device
 char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
     if (value == 1) {
-    	IO_setPortDirection(SDA, INPUT);
+    	IO_setPortDirection(SDA, INPUT); //sda goes high
     } else {
-    	SDALOW();
+    	SDALOW(); //sda goes low
     }
     delayMicroseconds(T2);
-    IO_setPortDirection(SCL, INPUT);
+    IO_setPortDirection(SCL, INPUT); //pulse scl high
     delayMicroseconds(T1);
-    if (!clock_stretching()) {
+    if (!clock_stretching()) { //check for clock stretching
     	return false;
     }
-    SCLLOW();
+    SCLLOW(); //and then pulse scl low
     return (true);
 }
 
@@ -213,7 +232,7 @@ int read(unsigned int addr, void* buf, int count) { //count buffer in BYTES
     return count; //return the amount of bytes read
 }
 
-int write(uint8_t addr, void* buf, int count) { //count in BYTES
+int write(unsigned int addr, void* buf, int count) { //count in BYTES
     // Check if repeated start condition should be generated
     if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
     	return (-1);
@@ -233,20 +252,86 @@ int write(uint8_t addr, void* buf, int count) { //count in BYTES
 
     // Write given buffer to device
     int count = 0;
+    int max = count/8;
     int i = 0;
-    for(i=0; i<count; i++) {
+    int j = 0;
 
-    	///THIS IS VERY NOT DONE PLS FINISH
-      const uint8_t* bp = (const uint8_t*) vp->buf;
-      size_t size = vp->size;
-      count += size;
-      while (size--) {
-	uint8_t data = *bp++;
-	if (!write_byte(data, nack) || nack) return (-1);
-      }
-    }
+    for (i=0; i<max; i++) {
+    	unsigned char data[8]; //create the 8 byte data array
+    	for (j=0; j<8; j++) {
+    		data[j] = buf[count+j];
+    	}
+		if (!write_byte(data, nack) || nack) { //check if the write was successful
+			return (-1);
+		}
+		count+=8;
+	}
     return (count);
-  }
+}
+
+int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
+	/*// Check if repeated start condition should be generated
+    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
+    	return (-1);
+    }
+    m_start = false;*/
+
+    start_condition();
+
+    // Address device with read request and check that it acknowledges
+    char nack;
+    if (!write_byte(addr & 0b11111110, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
+
+    //Write to register
+    if (!write_byte(reg, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
+
+    //Write value
+    if (!write_byte(value, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
+
+    stop_condition();
+
+    return true;
+}
+
+int readRegister(unsigned int addr, unsigned char reg, unsigned char* value) {
+	/*// Check if repeated start condition should be generated
+    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
+    	return (-1);
+    }
+    m_start = false;*/
+
+	start_condition();
+
+	// Address device with read request and check that it acknowledges
+    char nack;
+    if (!write_byte(addr & 0b11111110, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1); //make sure R/W bit is 0
+    }
+
+    //Read from register
+    if (!write_byte(reg, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
+
+    start_condition(); //repeat start condition
+
+    if (!write_byte(addr | 1, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1); //^^ make sure addr bit 0 is 1 to make RW bit high for reading
+    }
+
+    //Read from register
+    if (!read_byte(value, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return -1;
+    }
+
+    stop_condition();
+}
 
 
 
