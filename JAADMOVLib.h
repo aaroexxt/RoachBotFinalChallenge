@@ -1,6 +1,6 @@
 /* 
- * File:   JAADSM.h
- * Author: Aaron
+ * File:   JAADMOVLib.h
+ * Author: Ashvin
  *
  * Created on July 22, 2019, 4:58 PM
  */
@@ -8,16 +8,16 @@
 #ifndef JAADSM_H
 #define	JAADSM_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+void initTurn(int degrees);
 
+int turn(void);
 
+char isTurnFinished(void);
 
+void initFwd(int distance);
 
-#ifdef	__cplusplus
-}
-#endif
+void fwd(void);
+
+char isFwdFinished(void);
 
 #endif	/* JAADSM_H */
-
