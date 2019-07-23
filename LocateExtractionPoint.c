@@ -55,8 +55,8 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event)
         printf("DriveForward");
         case Reverse:
         printf("Reverse");
-        case TurnNinty:
-        printf("TurnNinty");
+        case TurnNinety:
+        printf("TurnNinety");
             }
             break;
         case Orienting:

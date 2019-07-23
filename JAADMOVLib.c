@@ -71,3 +71,7 @@ int fwd(void){
         return driveP * (driveSetpoint - driveCurrentPos);
     }
 }
+
+char isFwdFinished(){
+    return isFinishedDrive;
+}
