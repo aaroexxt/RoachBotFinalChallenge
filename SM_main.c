@@ -79,10 +79,13 @@ void PrintEvent(Event event)
 int main(void)
 {
     
+    int state = 0;
     //These calls configure the Pic32 so that it can interact with the Roach hardware
     BOARD_Init();
     Roach_Init();
     TIMERS_Init();
+    IO_setPortDirection(SDA, OUTPUT);
+    IO_setPortDirection(SCL, OUTPUT);
 
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);
@@ -108,7 +111,22 @@ int main(void)
 
         }
 
+        if (TIMERS_IsTimerExpired(14)){
+            TIMERS_InitTimer(14, 1000);
+            if(state == 0){
+                state = 1;
+            } else {
+                state = 0;
+            }
+            IO_setPort(SDA, state);
+            IO_setPort(SCL, state);
+
+
+        }
+
     }
+
+
 
     return (EXIT_SUCCESS);
 }

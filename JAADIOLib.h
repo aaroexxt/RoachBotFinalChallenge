@@ -12,19 +12,19 @@
 extern "C" {
 #endif
 
-#define SCL_TRIS TRISBbits.TRISB9
+#define SCL_TRIS TRISBbits.TRISB11
 //Serial Clock Pin ID
 
-#define SCL_BIT PORTBbits.RB9
+#define SCL_BIT PORTBbits.RB11
 
-#define SCL_LAT LATBbits.LATB9
+#define SCL_LAT LATBbits.LATB11
 
 
-#define SDA_TRIS TRISBbits.TRISB8
+#define SDA_TRIS TRISBbits.TRISB12
 // Serial Data Pin ID
-#define SDA_BIT PORTBbits.RB8
+#define SDA_BIT PORTBbits.RB12
 
-#define SDA_LAT LATBbits.LATB8
+#define SDA_LAT LATBbits.LATB12
 
 
 int IO_setPortDirection(short pinNumber, int direction);
