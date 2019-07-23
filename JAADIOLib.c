@@ -16,21 +16,38 @@ enum{
 	LOW
 }
 
+enum{
+
+	SCL,
+	SDA
+}
+
+
 
 /** @param[in] port ID number(pinNumber) and INPUT or OUTPUT assignment (direction). 
 pinNumber equals to 1 if direction equals to 1, otherwise pinNumber equals to 0.
 setting the port's value to input or output
 */
-int IO_setPortDirection(short pinNumber, int direction){
-
-	if (direction == INPUT){
-
-		pinNumber = 1;
+int IO_setPortDirection(int pin, int direction){
+	if (pin == SDA) {
+		if(direction == HIGH){
+			SDA_TRIS = 1;
+		} else {
+			SDA_TRIS = 0;
+		}
 	}
 	else{
+		if (direction == HIGH){
 
-		pinNumber = 0;
+			SCL_TRIS = 1;
+		}
+		else{
+
+			SCL_TRIS = 0;
+		}
+		
 	}
+
 
 }
 
@@ -39,51 +56,46 @@ pinNumber equals to 1 if newValue equals to HIGH, otherwise pinNumber equals to 
 set the value to either 1 (high voltage) or 0 (low voltage)
 */
 
-int IO_setPort(short pinNumber, int newValue){
+int IO_setPort(int pin, int newValue){
 
-	if (newValue == HIGH){
-
-		pinNumber = 1;
+	if (pin == SDA) {
+		
+		SDA_LAT = newValue;
+		
 	}
 	else{
-
-		pinNumber = 0;
+		
+		SCL_LAT = newValue;
+		
+		
 	}
+
 }
 
 /** @param[in] port ID number(pinNumber), read from the input value. 
 Return (1) if pinNumber equals to 1, otherwise returns 0.
-*/
-
-int IO_readPort(short pinNumber){
-
-	if(pinNumber == 1){
-
-		return 1;
-	}
-	else{
-
-		return 0;
-	}
-
-}
-
-/** @param[in] port ID number(pinNumber).
-Return (1) if pinNumber equals to 1, otherwise returns 0.
 check if the input value is an input or output
+
 */
 
-char IO_checkInputValue(short pinNumber){
+int IO_readPort(int pin){
 
-	if (pinNumber == 1){
+	if(pin == SDA){
 
-		return 1;
-
+		return SDA_BIT;
 	}
 	else{
 
-		return 0;
+		return SCL_BIT;
 	}
+
 }
+
+
+
+
+
+
+
 
 
