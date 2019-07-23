@@ -1,9 +1,12 @@
 #ignore all c files for build
-
-nbproject
-build
-dist
+nbproject/**
+build/**
+dist/**
 
 #Ignore hex
 
 RoachBotFinalChallenge.production.hex
+
+#MAC
+
+.DS_Store
