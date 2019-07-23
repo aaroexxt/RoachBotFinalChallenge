@@ -6,21 +6,7 @@
  */
 
 //this enum stores the two constants for the IO_setPortDirection function
-enum {
-	INPUT,
-	OUTPUT
-}
 
-enum{
-	HIGH,
-	LOW
-}
-
-enum{
-
-	SCL,
-	SDA
-}
 
 
 
