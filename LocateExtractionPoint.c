@@ -7,12 +7,21 @@
 
 //a list of states that this SM uses:
 
+//Enum for Main States
 enum {
     //your states here
-    Idle,
+    Aligning,
+    Orienting,
+    Driving
+};
+
+//Enum for Aligning Substates
+enum {
+    
 };
 
 int current_state;
+int substate_state;
 
 /* This function initializes the roach state machine.
  * At a minimum, this requires setting the first state.
@@ -29,7 +38,15 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
 Event Run_Roach_LocateExtractionPoint_StateMachine(Event event)
 {
     switch (current_state) {
-     //SM here   
+        case Aligning:
+            switch (substate_state) {
+                
+            }
+            break;
+        case Orienting:
+            break;
+        case Driving:
+            break;
     }        
     return event;
 };
