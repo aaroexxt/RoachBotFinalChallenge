@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/COSMOS_Final_Project_Framework.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=COSMOS_Final_Project_Framework.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=cosmosfinalprojectframework.x/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/RoachBotFinalChallenge.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=RoachBotFinalChallenge.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=roachbotfinalchallenge/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/cosmosfinalprojectframework.x/bin
+makeDirectory ${TMPDIR}/roachbotfinalchallenge/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/cosmosfinalprojectframework.x.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/roachbotfinalchallenge.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/cosmosfinalprojectframework.x.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/roachbotfinalchallenge.tar *
 checkReturnCode
 
 # Cleanup

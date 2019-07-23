@@ -5,4 +5,5 @@ roach.h  \
 BOARD.h  \
  timers.h  \
 Roach_Top_Level_SM.h  \
-Roach_Events.h 
+Roach_Events.h  \
+JAADSM.h 

@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=COSMOS_Final_Project_Framework.X
+PROJECTNAME=RoachBotFinalChallenge
 
 # Active Configuration
 DEFAULTCONF=default

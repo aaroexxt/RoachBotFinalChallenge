@@ -17,6 +17,7 @@
 #include "roach.h"
 #include "timers.h"
 #include "Roach_Top_Level_SM.h"
+#include "JAADSM.h"
 #include "Roach_Events.h"
 
 
