@@ -29,18 +29,18 @@ extern "C" {
 enum {
 	INPUT,
 	OUTPUT
-}
+};
 
 enum{
 	HIGH,
 	LOW
-}
+};
 
 enum{
 
 	SCL,
 	SDA
-}
+};
 
 
 int IO_setPortDirection(int pin, int direction);
