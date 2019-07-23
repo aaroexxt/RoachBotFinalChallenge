@@ -67,6 +67,8 @@ char I2C_Init() {
 		printf("JAADi2c INIT recieved");
 		IO_setPortDirection(SDA, INPUT); //allow both to be pulled high
 		IO_setPortDirection(SCL, INPUT);
+
+		I2C_InitSensors(); //Initialize the sensors
 	} else {
 		return false;
 	}
@@ -82,7 +84,37 @@ char I2C_InitSensors() {
 
   	delayMS(10); //wait 10ms
 
+  	unsigned char id = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG);
+  	printf("ACCEL whoami: %x",id);
+	if (id != LSM9DS1_XG_ID) { //reeee id check failed
+		return false;
+	}
 
+	id = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M);
+	printf("MAG whoami: %x",id);
+	if (id != LSM9DS1_MAG_ID) {
+		return false;
+	}
+
+	// enable gyro continuous
+	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG1_G, 0xC0); // on XYZ
+
+	// Enable the accelerometer continous
+	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG5_XL, 0x38); // enable X Y and Z axis
+	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG6_XL, 0xC0); // 1 KHz out data rate, BW set by ODR, 408Hz anti-aliasing
+
+
+	// enable mag continuous
+	//write8(MAGTYPE, LSM9DS1_REGISTER_CTRL_REG1_M, 0xFC); // high perf XY, 80 Hz ODR
+	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG3_M, 0x00); // continuous mode
+	//write8(MAGTYPE, LSM9DS1_REGISTER_CTRL_REG4_M, 0x0C); // high perf Z mode
+
+	// Set default ranges for the various sensors  
+	setupAccel(LSM9DS1_ACCELRANGE_2G);
+	setupMag(LSM9DS1_MAGGAIN_4GAUSS);
+	setupGyro(LSM9DS1_GYROSCALE_245DPS);
+
+	return true;
 }
 
 /********
@@ -299,7 +331,7 @@ int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
     return true;
 }
 
-int readRegister(unsigned int addr, unsigned char reg, unsigned char* value) {
+unsigned char readRegister(unsigned int addr, unsigned char reg) {
 	/*// Check if repeated start condition should be generated
     if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
     	return (-1);
@@ -326,11 +358,15 @@ int readRegister(unsigned int addr, unsigned char reg, unsigned char* value) {
     }
 
     //Read from register
-    if (!read_byte(value, nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return -1;
+    unsigned char value;
+
+    if (!read_byte(&value, nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return -1; //^ use pointer
     }
 
     stop_condition();
+
+    return value; //return pointerized value
 }
 
 
