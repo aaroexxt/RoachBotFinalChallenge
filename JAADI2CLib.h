@@ -8,6 +8,9 @@
 #ifndef JAADI2CLIB_H
 #define	JAADI2CLIB_H
 
+#define true 1
+#define false -1
+
 
 #define ACCELADDR          (0x6B)
 #define MAGADDR                (0x1E)
@@ -80,18 +83,27 @@
 
 
 
-#define	LSM9DS1_ACCELRANGE_2G                 (0b00 << 3)
-#define	LSM9DS1_ACCELRANGE_16G                (0b01 << 3)
-#define	LSM9DS1_ACCELRANGE_4G                 (0b10 << 3)
-#define	LSM9DS1_ACCELRANGE_8G                 (0b11 << 3)
+typedef enum
+{
+	LSM9DS1_ACCELRANGE_2G                = (0b00 << 3),
+	LSM9DS1_ACCELRANGE_16G               = (0b01 << 3),
+	LSM9DS1_ACCELRANGE_4G                = (0b10 << 3),
+	LSM9DS1_ACCELRANGE_8G                = (0b11 << 3)
+} accelRange_t;
 
+typedef enum
+{
+	LSM9DS1_MAGGAIN_4GAUSS               = (0b00 << 5),  // +/- 4 gauss
+	LSM9DS1_MAGGAIN_8GAUSS               = (0b01 << 5),  // +/- 8 gauss
+	LSM9DS1_MAGGAIN_12GAUSS              = (0b10 << 5),  // +/- 12 gauss
+	LSM9DS1_MAGGAIN_16GAUSS              = (0b11 << 5)   // +/- 16 gauss
+} magGain_t;
 
-
-#define LSM9DS1_MAGGAIN_4GAUSS                (0b00 << 5)  // +/- 4 gauss
-#define LSM9DS1_MAGGAIN_8GAUSS                (0b01 << 5)  // +/- 8 gauss
-#define LSM9DS1_MAGGAIN_12GAUSS               (0b10 << 5)  // +/- 12 gauss
-#define LSM9DS1_MAGGAIN_16GAUSS               (0b11 << 5)   // +/- 16 gauss
-
+typedef enum {
+  LSM9DS1_GYROSCALE_245DPS             = (0b00 << 3),  // +/- 245 degrees per second rotation
+  LSM9DS1_GYROSCALE_500DPS             = (0b01 << 3),  // +/- 500 degrees per second rotation
+  LSM9DS1_GYROSCALE_2000DPS            = (0b11 << 3)   // +/- 2000 degrees per second rotation
+} gyroScale_t;
 
 
 #define	LSM9DS1_MAGDATARATE_3_125HZ           (0b000 << 2)
@@ -102,8 +114,8 @@
 #define	LSM9DS1_MAGDATARATE_100HZ             (0b101 << 2)
 
 
-#define	LSM9DS1_GYROSCALE_245DPS              (0b00 << 3),  // +/- 245 degrees per second rotation
-#define	LSM9DS1_GYROSCALE_500DPS              (0b01 << 3),  // +/- 500 degrees per second rotation
+#define	LSM9DS1_GYROSCALE_245DPS              (0b00 << 3)  // +/- 245 degrees per second rotation
+#define	LSM9DS1_GYROSCALE_500DPS              (0b01 << 3)  // +/- 500 degrees per second rotation
 #define	LSM9DS1_GYROSCALE_2000DPS             (0b11 << 3)   // +/- 2000 degrees per second rotation
 
 

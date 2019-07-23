@@ -19,8 +19,8 @@
 #include "timers.h"
 #include "Roach_Top_Level_SM.h"
 #include "JAADMain.h"
-//#include "JAADI2CLib.c"
-//#include "JAADMOVLib.c"
+#include "JAADI2CLib.c"
+#include "JAADMOVLib.c"
 #include "JAADIOLib.c"
 #include "Roach_Events.h"
 
