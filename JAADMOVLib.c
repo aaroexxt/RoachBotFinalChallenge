@@ -6,6 +6,7 @@
  */
 
 #include "JAADMOVLib.h"
+#include <time.h>
 #define turnP 0.2
 #define driveP 0.2
 #define timerId 0
@@ -23,17 +24,22 @@ char isFinishedTurn = 0;
 int turnCount = 0;
 char turnTimeCheck = 0;
 
+int prevClockTime = 0;
+int currentClockTime = 0;
+
 void MOV_initTurn(int degrees) {
     turnCount = 0;
     turnCurrentPos = 0;
     turnSetpoint = degrees;
     isFinishedTurn = 0;
     turnTimeCheck = 0;
+    prevClockTime = clock();
 }
 
 int MOV_updateTurn(void) {
     gyroAngle = 0; //will change to update gyroAngle
-    turnCurrentPos += gyroAngle;
+    currentClockTime = clock();
+    turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime);
     int deltaSetpoint = turnSetpoint - turnCurrentPos;
 
     if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !turnTimeCheck){
@@ -47,6 +53,7 @@ int MOV_updateTurn(void) {
         return 0;
         isFinishedTurn = 1;
     }
+    prevClockTime = currentClockTime;
     return turnP * deltaSetpoint;
 }
 
@@ -65,7 +72,7 @@ int vel = 0;
 int driveSetpoint = 0;
 char isFinishedDrive = 0;
 int driveCount = 0;
-char driveTimeCheck
+char driveTimeCheck = 0;
 
 void MOV_initFwd(int distance){
     vel = 0;
@@ -74,12 +81,14 @@ void MOV_initFwd(int distance){
     driveCurrentPos = 0;
     isFinishedDrive = 0;
     driveTimeCheck = 0;
+    prevClockTime = clock();
 }
 
 int MOV_updateFwd(void){
     acc = 0; //change to accelerometer value
-    vel += acc;
-    driveCurrentPos += vel;
+    currentClockTime = clock();
+    vel += acc * (currentClockTime - prevClockTime);
+    driveCurrentPos += vel * (currentClockTime - prevClockTime);
     int deltaSetpoint = driveSetpoint - driveCurrentPos;
 
     if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !driveTimeCheck){
@@ -93,6 +102,7 @@ int MOV_updateFwd(void){
         return 0;
         isFinishedDrive = 1;
     }
+    prevClockTime = currentClockTime;
     return driveP * deltaSetpoint;
 }
 
