@@ -35,9 +35,13 @@ set the value to either 1 (high voltage) or 0 (low voltage)
 
 int IO_setPort(int pin, int newValue) {
 	if (pin == SDA) {
-		SDA_LAT = (newValue == HIGH) ? 1 : 0;
+		if(SDA_TRIS == OUTPUT){
+			SDA_LAT = (newValue == HIGH) ? 1 : 0;
+		}
 	} else {
-		SCL_LAT = (newValue == HIGH) ? 1 : 0;	
+		if(SCL_TRIS == OUTPUT){
+			SCL_LAT = (newValue == HIGH) ? 1 : 0;	
+		}
 	}
 	return true;
 }
@@ -50,9 +54,13 @@ check if the input value is an input or output
 
 int IO_readPort(int pin) {
 	if (pin == SDA){
-		return (SDA_BIT == 1) ? true : false;
+		if(SDA_TRIS == INPUT){
+			return (SDA_BIT == 1) ? true : false;
+		}
 	} else {
-		return (SCL_BIT == 1) ? true : false;
+		if(SCL_TRIS == INPUT){
+			return (SCL_BIT == 1) ? true : false;
+		}
 	}
 }
 

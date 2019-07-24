@@ -24,7 +24,7 @@
 //Define true and false because C is dumb
 #ifndef true
 #define true 1
-#define false 0
+#define false -1
 #endif
 
 //this enum stores the two constants for the IO_setPortDirection function
