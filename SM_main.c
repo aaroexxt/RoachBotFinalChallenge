@@ -85,8 +85,10 @@ int main(void)
     BOARD_Init();
     Roach_Init();
     TIMERS_Init();
+    
     IO_setPortDirection(SDA, OUTPUT);
     IO_setPortDirection(SCL, OUTPUT);
+    TIMERS_InitTimer(14, 1000);
 
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);

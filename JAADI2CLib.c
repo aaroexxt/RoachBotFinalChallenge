@@ -58,7 +58,7 @@ int _gyro_dps_digit;
 #define CORE_TIMER_MICROSECONDS (CORE_TIMER_FREQUENCY/1000000) //microsecond count time (cpu cycles)
 
 /** DEBUG MODE */
-char debugMode = true;
+char debugMode = false;
 
 /*****
 * DEBUG FUNCTIONS
@@ -66,14 +66,34 @@ char debugMode = true;
 
 void debugPrint(char str[]) {
 	puts(str);
-	printf("\n");
+	printf("\r\n");
 }
 
 void debugPrintArray(char array[], int len) {
 	int i = 0;
 	for (i = 0; i<len; i++) {
-		printf("i=%d, e=%d \n", i, array[i]);
+		printf("i=%d, e=%d \r\n", i, array[i]);
 	}
+}
+
+void I2C_setDebugOn(void) {
+	debugMode = true;
+}
+
+void I2C_setDebugOff(void) {
+	debugMode = false;
+}
+
+void I2C_printAccel(AccelData data) {
+	printf("(AccReading) x: %d, y: %d, z: %d \r\n", data.x, data.y, data.z);
+}
+
+void I2C_printGyro(GyroData data) {
+	printf("(GyroReading) x: %d, y: %d, z: %d \r\n", data.x, data.y, data.z);
+}
+
+void I2C_printMag(MagData data) {
+	printf("(MagReading) x: %d, y: %d, z: %d \r\n", data.x, data.y, data.z);
 }
 /******
 LOWEST LEVEL FUNCTIONS
@@ -173,7 +193,7 @@ char stop_condition() {
 //Write a single bit to device
 char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
     debugPrint("writeBit:");
-    debugPrint(value);
+    debugPrint(&value);
 
     if (value == 1) {
     	IO_setPortDirection(SDA, INPUT); //sda goes high
