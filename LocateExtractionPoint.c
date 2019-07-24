@@ -1,5 +1,7 @@
 //File: LocateExtractionPoint.c
 
+//Author: Joshua Pan
+
 
 #include <stdio.h>
 #include "JAADI2CLib.h"
@@ -16,7 +18,8 @@ enum {
     //your states here
     Aligning,
     Orienting,
-    Driving
+    Driving,
+    Finish
 };
 
 //Enum for Aligning Substates
@@ -24,11 +27,12 @@ enum {
     TurnZero,
     DriveForward,
     Reverse,
-    TurnNinety
+    TurnNinety,
+    DriveToCorner
 };
 
-int current_state;
-int substate_state;
+static int current_state;
+static int substate_state;
 
 AccelData currentAccel;
 GyroData currentGyro;
@@ -41,8 +45,8 @@ MagData currentMag;
 void Initialize_LocateExtractionPoint_StateMachine(void)
 {
     printf("init locateextractionpoint");
-    I2C_Init(); //init I2C library
-    I2C_setDebugOn(); //set debug mode to be on
+    /*I2C_Init(); //init I2C library
+    I2C_setDebugOn(); //set debug mode to be on*/
     
 //    current_state = Aligning;
     //^ removed because I don't want switch-case to run
@@ -64,25 +68,84 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
     
     switch (current_state) {
         case Aligning:
+        printf("Aligning");
             switch (substate_state) {
                 case TurnZero:
-                    printf("Turn Zero");
+                    printf("TurnZero");
+                    if (MOV_isTurnFinished()) {
+                       substate_state = DriveForward;
+                       Roach_LeftMtrSpeed(100);
+                       Roach_RightMtrSpeed(100);
+                    } else{
+                        int newMotorSpeed = MOV_updateTurn();
+                        Roach_LeftMtrSpeed(newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
+                    }
                     break;
                 case DriveForward:
                     printf("DriveForward");
+                    if(event == BOTH_BUMPER_PRESSED){
+                        current_state = Reverse;
+                        MOV_initFwd(-5);
+                    }
+                    
                     break;
                 case Reverse:
                     printf("Reverse");
+                     if (MOV_isFwdFinished()){
+                        substate_state = TurnNinety;
+                        MOV_initTurn(90);
+                    }else{
+                        int newMotorSpeed =  MOV_updateFwd();
+                        Roach_LeftMtrSpeed(newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
+                    }
                     break;
                 case TurnNinety:
                     printf("TurnNinety");
+                    if (MOV_isTurnFinished()) {
+                        substate_state = DriveToCorner;
+                        Roach_LeftMtrSpeed(100);
+                        Roach_RightMtrSpeed(100);
+                    }else{
+                        int newMotorSpeed = MOV_updateTurn();
+                        Roach_LeftMtrSpeed(newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
+                    }
                     break;
+                case DriveToCorner:
+                    printf("DriveToCorner");
+                    if(event == BOTH_BUMPER_PRESSED){
+                        current_state = Orienting;
+                        MOV_initTurn(135);
+                    }
             }
             break;
         case Orienting:
+            printf("Orienting")
+            if (MOV_isTurnFinished()) {
+                current_state = Driving;
+                MOV_initFwd(20);
+            } else{
+                int newMotorSpeed = MOV_updateTurn();
+                Roach_LeftMtrSpeed(newMotorSpeed);
+                Roach_RightMtrSpeed(newMotorSpeed);
+            }
             break;
         case Driving:
+            printf("Driving");
+            if (MOV_isFwdFinished()){
+                current_state= Finish;
+                Roach_LeftMtrSpeed(0);
+                Roach_RightMtrSpeed(0);
+            }else{
+                int newMotorSpeed =  MOV_updateFwd();
+                Roach_LeftMtrSpeed(newMotorSpeed);
+                Roach_RightMtrSpeed(newMotorSpeed);
+            }
             break;
+        case Finish:
+
     }        
     return event;
 };
