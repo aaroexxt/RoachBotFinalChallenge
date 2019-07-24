@@ -94,11 +94,11 @@ int main(void)
 
 
     //first, setup the framework:
-    Initialize_RoachStateMachine();
+//    Initialize_RoachStateMachine();
 
     while (1) {
         //continuous services (event checkers):
-        Event this_event = CheckForAllEvents();
+        /*Event this_event = CheckForAllEvents();
 
         if (this_event != NO_EVENT) {
             //seed rand (leverage unpredictable event timing):
@@ -111,18 +111,21 @@ int main(void)
             //clear event:
             this_event = NO_EVENT;
 
-        }
+        }*/
 
         if (TIMERS_IsTimerExpired(14)){
             TIMERS_InitTimer(14, 1000);
-            if(state == 0){
-                state = 1;
+            printf("ST: %d\r\n", state);
+            if(state == LOW){
+                state = HIGH;
             } else {
-                state = 0;
+                state = LOW;
             }
             IO_setPort(SDA, state);
             IO_setPort(SCL, state);
-
+            
+            printf("SDALAT: %d",SDA_LAT);
+            printf("SCLLAT: %d\r\n",SCL_LAT);
 
         }
 
