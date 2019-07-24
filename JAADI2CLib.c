@@ -244,7 +244,7 @@ char read_byte(unsigned char *finalByte, char ack) {
     return (write_bit(!ack)); //Send ACK bit (MUST HAPPEN)
 }
 
-char read_bytesBuffer(unsigned char *buffer, char ack, int bytes) {
+char read_bytesBuffer(unsigned char *buffer, int bytes) {
     unsigned char value;
     int i = 0;
 
@@ -252,17 +252,13 @@ char read_bytesBuffer(unsigned char *buffer, char ack, int bytes) {
     	buffer[i] = 0; //reset buffer and value
     	value = 0;
 
-		if (!read_byte(&value, ack)) {
+		if (!read_byte(&value, ((i < bytes-1) ? 1 : 0))) { //if i<bytes then send ACK
 			return (false); //if failed to read just return false
 		}
 		buffer[i] = value; //write it to the proper portion of the buffer
-
-		if (i != bytes) { //at any point except for the last one send an ACK
-			write_bit(!ack); //write the ACK
-		}
     }
     //Send the final ACK
-    return (write_bit(!ack)); //return if the device will accept a ACK bit
+    return true;//(write_bit(0)); //return if the device will accept a ACK bit
 }
 
 /******
@@ -319,7 +315,7 @@ unsigned char readRegister(unsigned int addr, unsigned char reg) {
     //Read from register
     unsigned char value;
 
-    if (!read_byte(&value, nack)) { //if nack returns, then no device found or other issue with protocol
+    if (!read_byte(&value, 0)) { //no ACK when reading
     	return -1; //^ use pointer
     }
 
@@ -350,7 +346,7 @@ unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned 
     }
 
     //Read from register
-    if (!read_bytesBuffer(buffer, nack, bytes)) { //if nack returns, then no device found or other issue with protocol
+    if (!read_bytesBuffer(buffer, bytes)) { //if nack returns, then no device found or other issue with protocol
     	return -1; //^ use pointer, internal register of device should increment automatically
     }
 
