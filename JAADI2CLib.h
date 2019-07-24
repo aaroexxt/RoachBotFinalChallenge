@@ -141,7 +141,6 @@ typedef struct {
 
 
 //Function definitions
-
 char I2C_Init(); //init function taking speed as a value in Hz
 char I2C_InitSensors();
 
@@ -158,9 +157,9 @@ void setupMag();
 void setupGyro();
 
 //Data structures
-AccelData getAccelData();
-MagData getMagData();
-GyroData getGyroData();
+AccelData I2C_getAccelData();
+MagData I2C_getMagData();
+GyroData I2C_getGyroData();
 
 #endif	/* JAADSM_H */
 

@@ -49,9 +49,9 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
  * @param event:  The most recently detected event*/
 Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
     //Update the current gyro values
-    currentAccel = getAccelData();
-    currentGyro = getGyroData();
-    currentMag = getMagData();
+    currentAccel = I2C_getAccelData();
+    currentGyro = I2C_getGyroData();
+    currentMag = I2C_getMagData();
     
     //Print the values for debugging
     I2C_printAccel(currentAccel);
