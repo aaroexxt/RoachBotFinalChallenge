@@ -57,6 +57,24 @@ int _gyro_dps_digit;
 #define CORE_TIMER_MILLISECONDS (CORE_TIMER_FREQUENCY/1000) //millisecond count time (cpu cycles)
 #define CORE_TIMER_MICROSECONDS (CORE_TIMER_FREQUENCY/1000000) //microsecond count time (cpu cycles)
 
+/** DEBUG MODE */
+char debugMode = true;
+
+/*****
+* DEBUG FUNCTIONS
+*****/
+
+void debugPrint(char str[]) {
+	puts(str);
+	printf("\n");
+}
+
+void debugPrintArray(char array[], int len) {
+	int i = 0;
+	for (i = 0; i<len; i++) {
+		printf("i=%d, e=%d \n", i, array[i]);
+	}
+}
 /******
 LOWEST LEVEL FUNCTIONS
 ******/
@@ -99,6 +117,7 @@ void delayMS(unsigned long delay_ms) {
 
 //Start condition, beginning of frame
 char startCondition() {
+	debugPrint("startCondition");
 	IO_setPortDirection(SDA, INPUT); //set sda to input so that it gets pulled high
 	if (IO_readPort(SDA) == 0) { //Other device is pulling it low for some reason?
 		return false;
@@ -111,6 +130,7 @@ char startCondition() {
 
 //Repeated start condition
 char repeated_start_condition() {
+	debugPrint("rep_startCondition");
 	delayUS(T1);
 	IO_setPortDirection(SDA, INPUT);
 	if (IO_readPort(SDA) == 0) { //NACK recieved which is a rip
@@ -126,6 +146,7 @@ char repeated_start_condition() {
 
 //Allows clock stretching detection using pins
 char clock_stretching() {
+	debugPrint("clkStretching");
 	int retry;
 	for (retry = 0; retry < CLOCK_STRETCHING_RETRY_MAX; retry++) {
 		if (IO_readPort(SCL)) { //wait for ACK
@@ -138,6 +159,7 @@ char clock_stretching() {
 
 //End of frame condition
 char stop_condition() {
+	debugPrint("stopCondition");
     delayUS(T1);
     SDALOW();
     IO_setPortDirection(SCL, INPUT);
@@ -150,6 +172,9 @@ char stop_condition() {
 
 //Write a single bit to device
 char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
+    debugPrint("writeBit:");
+    debugPrint(value);
+
     if (value == 1) {
     	IO_setPortDirection(SDA, INPUT); //sda goes high
     } else {
@@ -167,6 +192,8 @@ char write_bit(char value) { //should write a single bit but can't because C doe
 
 //Read a single bit from device
 char read_bit(char *value) { //it's pointer time bois
+    debugPrint("readBit");
+
     IO_setPortDirection(SDA, INPUT);
     delayUS(T2);
     IO_setPortDirection(SCL, INPUT);
@@ -365,7 +392,7 @@ char I2C_initted = FALSE;
 char I2C_Init() {
 	if (!I2C_initted) {
 		I2C_initted = true;
-		printf("JAADi2c INIT recieved");
+		printf("JAADi2c outerINIT recieved");
 		IO_setPortDirection(SDA, INPUT); //allow both to be pulled high
 		IO_setPortDirection(SCL, INPUT);
 
@@ -376,12 +403,14 @@ char I2C_Init() {
 }
 
 char I2C_InitSensors() {
+	debugPrint("I2C_INITSENSORS BEGIN");
 	// soft reset & reboot accel/gyro
 	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG8, 0x05);
 
 	// soft reset & reboot magnetometer
   	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C);
 
+  	debugPrint("accel and mag soft reset OK");
   	delayMS(10); //wait 10ms
 
   	unsigned char id = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG, 8);
@@ -408,16 +437,19 @@ char I2C_InitSensors() {
 	//write8(MAGTYPE, LSM9DS1_REGISTER_CTRL_REG1_M, 0xFC); // high perf XY, 80 Hz ODR
 	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG3_M, 0x00); // continuous mode
 	//write8(MAGTYPE, LSM9DS1_REGISTER_CTRL_REG4_M, 0x0C); // high perf Z mode
+	debugPrint("Written basic configs to mag and accel");
 
 	// Set default ranges for the various sensors  
 	setupAccel(LSM9DS1_ACCELRANGE_2G);
 	setupMag(LSM9DS1_MAGGAIN_4GAUSS);
 	setupGyro(LSM9DS1_GYROSCALE_245DPS);
+	debugPrint("Default ranging done for sensors");
 
 	return true;
 }
 
 void setupAccel(accelRange_t range) {
+	debugPrint("setupAccel called");
 	unsigned char reg = readRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG6_XL, 8);
 	reg &= ~(0b00011000);
 	reg |= range;
@@ -438,9 +470,13 @@ void setupAccel(accelRange_t range) {
 			_accel_mg_lsb =LSM9DS1_ACCEL_MG_LSB_16G;
 			break;
 	}
+
+	debugPrint("setupAccel done");
+	return;
 }
 
 void setupMag(magGain_t gain) {
+	debugPrint("setupMag called");
 	unsigned char reg = readRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 8);
 	reg &= ~(0b01100000);
 	reg |= gain;
@@ -460,9 +496,13 @@ void setupMag(magGain_t gain) {
 			_mag_mgauss_lsb = LSM9DS1_MAG_MGAUSS_16GAUSS;
 			break;
 	}
+
+	debugPrint("setupMag done");
+	return;
 }
 
 void setupGyro(gyroScale_t scale) {
+	debugPrint("setupGyro called");
 	unsigned char reg = readRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG1_G, 8);
 	reg &= ~(0b00011000);
 	reg |= scale;
@@ -479,12 +519,17 @@ void setupGyro(gyroScale_t scale) {
 			_gyro_dps_digit = LSM9DS1_GYRO_DPS_DIGIT_2000DPS;
 			break;
 	}
+
+	debugPrint("setupGyro done");
+	return;
 }
 
 AccelData getAccelData() {
+	debugPrint("getAccelData called"); //debug print
 	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
+	debugPrintArray(buffer, 6); //debug print array
 	uint8_t xlo = buffer[0];
 	int32_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
@@ -515,10 +560,12 @@ AccelData getAccelData() {
 }
 
 MagData getMagData() {
+	debugPrint("getMagData called"); //debug print
 	// Read the magnetometer
 	char buffer[6];
 	readRegisterBuffer(MAGADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_M, buffer, 6);
 
+	debugPrintArray(buffer, 6); //debug print array
 	uint8_t xlo = buffer[0];
 	int32_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
@@ -544,10 +591,12 @@ MagData getMagData() {
 }
 
 GyroData getGyroData() {
+	debugPrint("getMagData called"); //debug print
 	// Read gyro
 	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_G, buffer, 6);
 
+	debugPrintArray(buffer, 6); //debug print array
 	uint8_t xlo = buffer[0];
 	int32_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
