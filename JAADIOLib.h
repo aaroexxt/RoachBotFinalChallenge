@@ -8,10 +8,6 @@
 #ifndef JAADIOLIB_H
 #define	JAADIOLIB_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 #define SCL_TRIS TRISBbits.TRISB11
 //Serial Clock Pin ID
 #define SCL_BIT PORTBbits.RB11
@@ -57,20 +53,6 @@ int IO_setPort(int pin, int newValue);
 
 int IO_readPort(int pin);
 // read from the input value
-
-
-
-
-
-
-
-
-
-
-#ifdef	__cplusplus
-
-}
-#endif
 
 #endif	/* JAADSM_H */
 

@@ -5,19 +5,19 @@
  * Created on July 22, 2019, 4:58 PM
  */
 
-#ifndef JAADMOVLib
-#define	JAADMOVLib
+#ifndef JAADMOVLib_H
+#define	JAADMOVLib_H
 
-void initTurn(int degrees);
+void MOV_initTurn(int degrees);
 
-int turn(void);
+int MOV_updateTurn(void);
 
-char isTurnFinished(void);
+char MOV_isTurnFinished(void);
 
-void initFwd(int distance);
+void MOV_initFwd(int distance);
 
-int fwd(void);
+int MOV_updateFwd(void);
 
-char isFwdFinished(void);
+char MOV_isFwdFinished(void);
 
 #endif	/* JAADSM_H */

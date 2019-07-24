@@ -11,6 +11,7 @@
 
 //Microchip's specialized library
 #include <xc.h>
+#include <peripheral/ports.h>
 
 //A library to use the uc32 board
 #include "BOARD.h"
@@ -18,9 +19,9 @@
 #include "timers.h"
 #include "Roach_Top_Level_SM.h"
 #include "JAADMain.h"
-#include "JAADI2CLib.h"
-#include "JAADMOVLib.h"
-#include "JAADIOLib.h"
+#include "JAADI2CLib.c"
+#include "JAADMOVLib.c"
+#include "JAADIOLib.c"
 #include "Roach_Events.h"
 
 
@@ -84,8 +85,10 @@ int main(void)
     BOARD_Init();
     Roach_Init();
     TIMERS_Init();
+    
     IO_setPortDirection(SDA, OUTPUT);
     IO_setPortDirection(SCL, OUTPUT);
+    TIMERS_InitTimer(14, 1000);
 
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);
