@@ -27,7 +27,7 @@ int current_state;
  * (that is, the actions on the arrow from the black dot in the SM diagram)*/
 void Initialize_RoachStateMachine(void)
 {
-    current_state = NavigateObstacleField;
+    current_state = LocateExtractionPoint; //TODO UNDO THIS
     ThrowEvent(STATE_TRANSITION);
     
     Initialize_NavigateObstacleField_StateMachine();

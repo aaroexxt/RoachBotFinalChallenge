@@ -40,8 +40,12 @@ MagData currentMag;
  * (that is, the actions on the arrow from the black dot in the SM diagram)*/
 void Initialize_LocateExtractionPoint_StateMachine(void)
 {
+    printf("init locateextractionpoint");
     I2C_Init(); //init I2C library
     I2C_setDebugOn(); //set debug mode to be on
+    
+//    current_state = Aligning;
+    //^ removed because I don't want switch-case to run
 };
 
 /* 
