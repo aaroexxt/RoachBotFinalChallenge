@@ -21,6 +21,14 @@
 
 #define SDA_LAT LATBbits.LATB13
 
+#define OUTPUT 0
+#define INPUT 1
+
+#define LOW 0
+#define HIGH 1
+
+
+
 //Define true and false because C is dumb
 #ifndef true
 #define true 1
@@ -28,16 +36,10 @@
 #endif
 
 //this enum stores the two constants for the IO_setPortDirection function
-enum {
-	OUTPUT,
-	INPUT
-};
+
 
 //this enum stores the two constants for the IO_setPort function
-enum {
-	LOW,
-	HIGH
-};
+
 
 //this enum stores the two constants for the potential ports
 enum {

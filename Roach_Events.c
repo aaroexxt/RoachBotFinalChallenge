@@ -43,6 +43,14 @@ Event CheckForTimerEvents(void)
     return NO_EVENT;
 }
 
+Event CheckBothBumperPressed(void){
+    static char previous_fl_bumper_state = BUMPER_NOT_TRIPPED;
+    char current_fl_bumper_state = Roach_ReadFrontLeftBumper();
+    if(previous_fl_bumper_state == BUMPER_NOT_TRIPPED && current_fl_bumper_state == BUMPER_TRIPPED){
+        return BOTH_BUMPER_PRESSED;
+    }
+    previous_fl_bumper_state = current_fl_bumper_state;
+}
 Event CheckForBumperEvents(void)
 {
     static char previous_fl_bumper_state = BUMPER_NOT_TRIPPED;
