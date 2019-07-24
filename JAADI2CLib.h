@@ -119,7 +119,7 @@ typedef enum {
 #define	LSM9DS1_GYROSCALE_2000DPS             (0b11 << 3)   // +/- 2000 degrees per second rotation
 
 
-//Structs
+//Structs for data transfer
 
 typedef struct {
 	int x;
@@ -139,19 +139,25 @@ typedef struct {
     int z;
 } GyroData;
 
+
+//Function definitions
+
 char I2C_Init(); //init function taking speed as a value in Hz
 char I2C_InitSensors();
 
+//Debug functions
 void I2C_setDebugOn();
 void I2C_setDebugOff();
 void I2C_printAccel(AccelData data);
 void I2C_printGyro(GyroData data);
 void I2C_printMag(MagData data);
 
+//Internal functions that are exposed for some reason
 void setupAccel();
 void setupMag();
 void setupGyro();
 
+//Data structures
 AccelData getAccelData();
 MagData getMagData();
 GyroData getGyroData();
