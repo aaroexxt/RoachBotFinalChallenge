@@ -85,12 +85,11 @@ int main(void)
     Roach_Init();
     TIMERS_Init();
     
-    IO_setPortDirection(SDA, OUTPUT);
-    IO_setPortDirection(SCL, OUTPUT);
-    TIMERS_InitTimer(14, 1000);
-
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);
+    
+    printf("I2CINIT %d",I2C_Init());
+    I2C_setDebugOn();
 
 
     //first, setup the framework:
@@ -113,20 +112,7 @@ int main(void)
 
         }*/
 
-        if (TIMERS_IsTimerExpired(14)){
-            TIMERS_InitTimer(14, 1000);
-            if(state == LOW){
-                state = HIGH;
-            } else {
-                state = LOW;
-            }
-            IO_setPort(SDA, !state);
-            IO_setPort(SCL, state);
-            
-            printf("SDALAT: %d",SDA_LAT);
-            printf("SCLLAT: %d\r\n",SCL_LAT);
-
-        }
+        
 
     }
 

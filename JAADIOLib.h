@@ -15,11 +15,11 @@
 #define SCL_LAT LATBbits.LATB12
 
 
-#define SDA_TRIS TRISBbits.TRISB9
+#define SDA_TRIS TRISBbits.TRISB13
 // Serial Data Pin ID
-#define SDA_BIT PORTBbits.RB9
+#define SDA_BIT PORTBbits.RB13
 
-#define SDA_LAT LATBbits.LATB9
+#define SDA_LAT LATBbits.LATB13
 
 #define OUTPUT 0
 #define INPUT 1

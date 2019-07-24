@@ -175,8 +175,7 @@ char stop_condition() {
 
 //Write a single bit to device
 char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
-    debugPrint("writeBit:");
-    debugPrint(&value);
+    printf("Value: %d\r\n",value);
 
     if (value == 1) {
     	IO_setPortDirection(SDA, INPUT); //sda goes high
@@ -367,9 +366,8 @@ char I2C_initted = false;
 
 //Top level abstractions
 char I2C_Init() {
-	if (!I2C_initted) {
+	if (I2C_initted == false) {
 		I2C_initted = true;
-		printf("JAADi2c outerINIT recieved");
 		IO_setPortDirection(SDA, INPUT); //allow both to be pulled high
 		IO_setPortDirection(SCL, INPUT);
 
