@@ -31,6 +31,7 @@ typedef enum {
     ENTERED_DARK,
     ENTERED_LIGHT,
     NAV_TIMER_EXPIRED
+    BOTH_BUMPER_PRESSED
 } Event;
 
 void ThrowEvent(Event event_to_throw);
