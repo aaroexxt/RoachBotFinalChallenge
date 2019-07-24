@@ -1,6 +1,6 @@
 /* 
  * File:   JAADSM.h
- * Author: Aaron
+ * Author: Daniel Lan
  *
  * Created on July 22, 2019, 4:58 PM
  */
@@ -10,7 +10,6 @@
 
 #define SCL_TRIS TRISBbits.TRISB11
 //Serial Clock Pin ID
-
 #define SCL_BIT PORTBbits.RB11
 
 #define SCL_LAT LATBbits.LATB11
@@ -23,11 +22,13 @@
 #define SDA_LAT LATBbits.LATB12
 
 enum {
+
 	INPUT,
 	OUTPUT
 };
 
 enum{
+
 	HIGH,
 	LOW
 };
