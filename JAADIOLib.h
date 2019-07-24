@@ -29,14 +29,14 @@
 
 //this enum stores the two constants for the IO_setPortDirection function
 enum {
-	INPUT,
-	OUTPUT
+	OUTPUT,
+	INPUT
 };
 
 //this enum stores the two constants for the IO_setPort function
 enum {
-	HIGH,
-	LOW
+	LOW,
+	HIGH
 };
 
 //this enum stores the two constants for the potential ports
