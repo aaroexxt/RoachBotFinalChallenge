@@ -8,6 +8,8 @@
 #include "JAADMOVLib.h"
 #define turnP 0.2
 #define driveP 0.2
+#define timerId 0
+#define checkTime 1000
 
 /*******
 * TURN CODE
@@ -19,12 +21,14 @@ int gyroAngle = 0;
 int turnSetpoint = 0;
 char isFinishedTurn = 0;
 int turnCount = 0;
+char turnTimeCheck = 0;
 
 void MOV_initTurn(int degrees) {
     turnCount = 0;
     turnCurrentPos = 0;
     turnSetpoint = degrees;
     isFinishedTurn = 0;
+    turnTimeCheck = 0;
 }
 
 int MOV_updateTurn(void) {
@@ -32,18 +36,18 @@ int MOV_updateTurn(void) {
     turnCurrentPos += gyroAngle;
     int deltaSetpoint = turnSetpoint - turnCurrentPos;
 
-    if (deltaSetpoint < 10 && deltaSetpoint > - 10){
-        turnCount++;
-    } else {
-        turnCount = 0;
+    if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !turnTimeCheck){
+        TIMERS_InitTimer(timerId, checkTime);
+        turnTimeCheck = 1;
     }
     
-    if (turnCount > 10) {
-        isFinishedTurn = 1;
+    if ((deltaSetpoint > 10 || deltaSetpoint < - 10) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck) {
+        turnTimeCheck = 0;
+    } else if((deltaSetpoint < 10 && deltaSetpoint > - 10) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck){
         return 0;
-    } else {
-        return turnP * deltaSetpoint;
+        isFinishedTurn = 1;
     }
+    return turnP * deltaSetpoint;
 }
 
 char MOV_isTurnFinished(void){
@@ -61,6 +65,7 @@ int vel = 0;
 int driveSetpoint = 0;
 char isFinishedDrive = 0;
 int driveCount = 0;
+char driveTimeCheck
 
 void MOV_initFwd(int distance){
     vel = 0;
@@ -68,6 +73,7 @@ void MOV_initFwd(int distance){
     driveCount = 0;
     driveCurrentPos = 0;
     isFinishedDrive = 0;
+    driveTimeCheck = 0;
 }
 
 int MOV_updateFwd(void){
@@ -76,18 +82,18 @@ int MOV_updateFwd(void){
     driveCurrentPos += vel;
     int deltaSetpoint = driveSetpoint - driveCurrentPos;
 
-    if(deltaSetpoint < 10 && deltaSetpoint > -10){
-        driveCount++;
-    } else {
-        driveCount = 0;
+    if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !driveTimeCheck){
+        TIMERS_InitTimer(timerId, checkTime);
+        driveTimeCheck = 1;
     }
-
-    if(driveCount > 10){
-        isFinishedDrive = 1;
+    
+    if ((deltaSetpoint > 10 || deltaSetpoint < - 10) && TIMERS_IsTimerExpired(timerId) && driveTimeCheck) {
+        driveTimeCheck = 0;
+    } else if((deltaSetpoint < 10 && deltaSetpoint > - 10) && TIMERS_IsTimerExpired(timerId) && driveTimeCheck){
         return 0;
-    } else {
-        return driveP * deltaSetpoint;
+        isFinishedDrive = 1;
     }
+    return driveP * deltaSetpoint;
 }
 
 char MOV_isFwdFinished(){
