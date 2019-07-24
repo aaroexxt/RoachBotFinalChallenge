@@ -46,10 +46,10 @@ const int CLOCK_STRETCHING_RETRY_MAX = 25;
 /** Transaction state; start or repeated start condition. */
 char m_start;
 
-//float to record accel lsb constants
-int _accel_mg_lsb;
-int _mag_mgauss_lsb;
-int _gyro_dps_digit;
+//float to record various scaling constants
+float _accel_mg_lsb;
+float _mag_mgauss_lsb;
+float _gyro_dps_digit;
 
 /** CPU CLOCK */
 #define CPU_FREQUENCY (80000000UL)                  /* Fcy = 80MHz (unsigned long) */
@@ -104,12 +104,12 @@ void SCLHIGH(void) {} //same with this
 
 void SDALOW(void) {
 	IO_setPortDirection(SDA, OUTPUT);
-	IO_setPort(SDA, LOW);
+	//IO_setPort(SDA, LOW);
 }
 
 void SCLLOW(void) {
 	IO_setPortDirection(SCL, OUTPUT);
-	IO_setPort(SCL, LOW);
+	//IO_setPort(SCL, LOW);
 }
 
 void delayUS(unsigned long delay_us) {
@@ -153,8 +153,9 @@ char startCondition() {
 char clock_stretching() {
 	debugPrint("clkStretching");
 	int retry;
+	IO_setPortDirection(SCL, INPUT); //make sure SCL can be pulled high
 	for (retry = 0; retry < CLOCK_STRETCHING_RETRY_MAX; retry++) {
-		if (IO_readPort(SCL)) { //wait for ACK
+		if (IO_readPort(SCL)) { //check if slave has released the SCL line
 			return true;
 		}
 		delayUS(T1);
@@ -203,7 +204,7 @@ char read_bit(char *value) { //it's pointer time bois
     delayUS(T2);
     IO_setPortDirection(SCL, INPUT);
     delayUS(T1);
-    if (!clock_stretching()) {
+    if (!clock_stretching()) { //wait for clock stretching
     	return false;
     }
     char portVal = IO_readPort(SDA);
@@ -228,7 +229,7 @@ char write_byte(unsigned char byte, unsigned char *nack) {
 		}
 	  	byte <<= 1; //bitshift it left (will wrap, but that's ok)
 	}
-	return (read_bit(nack));
+	return (read_bit(nack)); //Read ACK bit (MUST HAPPEN)
 }
 
 char read_byte(unsigned char *finalByte, char ack) {
@@ -243,7 +244,7 @@ char read_byte(unsigned char *finalByte, char ack) {
 		byte = (byte << 1) | value; //bitshift it to the proper place and bitwise OR with value to return current full byte (LSB to MSB)
     }
     finalByte = &byte;
-    return (write_bit(!ack)); //return if the device will accept a ACK bit
+    return (write_bit(!ack)); //Send ACK bit (MUST HAPPEN)
 }
 
 char read_bits(unsigned char *finalByte, char ack, int len) {
@@ -261,12 +262,15 @@ char read_bits(unsigned char *finalByte, char ack, int len) {
     return (write_bit(!ack)); //return if the device will accept a ACK bit
 }
 
-char read_bitsBuffer(unsigned char *buffer, char ack, int len) {
+char read_bytesBuffer(unsigned char *buffer, char ack, int bytes) {
     unsigned char value;
     int i = 0;
 
-    for (i = 0; i < len; i++) {
-		if (!read_bit(&value)) {
+    for (i = 0; i < bytes; i++) {
+    	buffer[i] = 0; //reset buffer and value
+    	value = 0;
+
+		if (!read_byte(&value, ack)) {
 			return (false); //if failed to read just return false
 		}
 		buffer[i] = value; //write it to the proper portion of the buffer
@@ -332,13 +336,13 @@ unsigned char readRegister(unsigned int addr, unsigned char reg, int bits) {
     startCondition(); //repeat start condition
 
     if (!write_byte(addr | 1, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1); //^^ make sure addr bit 0 is 1 to make RW bit high for reading
+    	return (-1); //^^ make sure addr LSB is 1 to make RW bit high for reading
     }
 
     //Read from register
     unsigned char value;
 
-    if (!read_bits(&value, nack, bits) || nack) { //if nack returns, then no device found or other issue with protocol
+    if (!read_bits(&value, nack, bits)) { //if nack returns, then no device found or other issue with protocol
     	return -1; //^ use pointer
     }
 
@@ -347,7 +351,7 @@ unsigned char readRegister(unsigned int addr, unsigned char reg, int bits) {
     return value; //return pointerized value
 }
 
-unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bits) {
+unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bytes) {
 	/*// Check if repeated start condition should be generated
     if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
     	return (-1);
@@ -374,8 +378,8 @@ unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned 
     }
 
     //Read from register
-    if (!read_bitsBuffer(buffer, nack, bits) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return -1; //^ use pointer
+    if (!read_bytesBuffer(buffer, nack, bytes)) { //if nack returns, then no device found or other issue with protocol
+    	return -1; //^ use pointer, internal register of device should increment automatically
     }
 
     stop_condition();
