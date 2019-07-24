@@ -529,7 +529,7 @@ void setupGyro(gyroScale_t scale) {
 	return;
 }
 
-AccelData getAccelData() {
+AccelData I2C_getAccelData() {
 	debugPrint("getAccelData called"); //debug print
 	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
@@ -564,7 +564,7 @@ AccelData getAccelData() {
 	return data;
 }
 
-MagData getMagData() {
+MagData I2C_getMagData() {
 	debugPrint("getMagData called"); //debug print
 	// Read the magnetometer
 	char buffer[6];
@@ -595,7 +595,7 @@ MagData getMagData() {
 	return data;
 }
 
-GyroData getGyroData() {
+GyroData I2C_getGyroData() {
 	debugPrint("getMagData called"); //debug print
 	// Read gyro
 	char buffer[6];

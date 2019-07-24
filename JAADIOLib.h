@@ -22,8 +22,10 @@
 #define SDA_LAT LATBbits.LATB12
 
 //Define true and false because C is dumb
+#ifndef true
 #define true 1
 #define false 0
+#endif
 
 //this enum stores the two constants for the IO_setPortDirection function
 enum {

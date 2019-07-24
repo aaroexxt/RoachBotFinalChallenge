@@ -8,8 +8,10 @@
 #ifndef JAADI2CLIB_H
 #define	JAADI2CLIB_H
 
+#ifndef true
 #define true 1
 #define false -1
+#endif
 
 
 #define ACCELADDR          (0x6B)
