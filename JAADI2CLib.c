@@ -43,9 +43,6 @@ const int T2 = 5;
 /** Maximum number of clock stretching retries: 100 us */
 const int CLOCK_STRETCHING_RETRY_MAX = 25;
 
-/** Transaction state; start or repeated start condition. */
-char m_start;
-
 //float to record various scaling constants
 float _accel_mg_lsb;
 float _mag_mgauss_lsb;
@@ -247,21 +244,6 @@ char read_byte(unsigned char *finalByte, char ack) {
     return (write_bit(!ack)); //Send ACK bit (MUST HAPPEN)
 }
 
-char read_bits(unsigned char *finalByte, char ack, int len) {
-    unsigned char value;
-    unsigned char byte = 0;
-    int i = 0;
-
-    for (i = 0; i < len; i++) {
-		if (!read_bit(&value)) {
-			return (false); //if failed to read just return false
-		}
-		byte = (byte << 1) | value; //bitshift it to the proper place and bitwise OR with value to return current full byte (LSB to MSB)
-    }
-    finalByte = &byte;
-    return (write_bit(!ack)); //return if the device will accept a ACK bit
-}
-
 char read_bytesBuffer(unsigned char *buffer, char ack, int bytes) {
     unsigned char value;
     int i = 0;
@@ -274,7 +256,12 @@ char read_bytesBuffer(unsigned char *buffer, char ack, int bytes) {
 			return (false); //if failed to read just return false
 		}
 		buffer[i] = value; //write it to the proper portion of the buffer
+
+		if (i != bytes) { //at any point except for the last one send an ACK
+			write_bit(!ack); //write the ACK
+		}
     }
+    //Send the final ACK
     return (write_bit(!ack)); //return if the device will accept a ACK bit
 }
 
@@ -284,11 +271,6 @@ char read_bytesBuffer(unsigned char *buffer, char ack, int bytes) {
 ******/
 
 int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
-	/*// Check if repeated start condition should be generated
-    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
-    	return (-1);
-    }
-    m_start = false;*/
 
     startCondition();
 
@@ -313,12 +295,7 @@ int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
     return true;
 }
 
-unsigned char readRegister(unsigned int addr, unsigned char reg, int bits) {
-	/*// Check if repeated start condition should be generated
-    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
-    	return (-1);
-    }
-    m_start = false;*/
+unsigned char readRegister(unsigned int addr, unsigned char reg) {
 
 	startCondition();
 
@@ -342,7 +319,7 @@ unsigned char readRegister(unsigned int addr, unsigned char reg, int bits) {
     //Read from register
     unsigned char value;
 
-    if (!read_bits(&value, nack, bits)) { //if nack returns, then no device found or other issue with protocol
+    if (!read_byte(&value, nack)) { //if nack returns, then no device found or other issue with protocol
     	return -1; //^ use pointer
     }
 
@@ -352,11 +329,6 @@ unsigned char readRegister(unsigned int addr, unsigned char reg, int bits) {
 }
 
 unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bytes) {
-	/*// Check if repeated start condition should be generated
-    if (!m_start && !repeated_start_condition()) { //if start is false and repeated start condition is false then i2c is not initted so kill
-    	return (-1);
-    }
-    m_start = false;*/
 
 	startCondition();
 
@@ -422,13 +394,13 @@ char I2C_InitSensors() {
   	debugPrint("accel and mag soft reset OK");
   	delayMS(10); //wait 10ms
 
-  	unsigned char accelId = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG, 8);
+  	unsigned char accelId = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG);
   	printf("ACCEL whoami: %x",accelId);
 	if (accelId != LSM9DS1_XG_ID) { //reeee accelId check failed
 		return false;
 	}
 
-	unsigned char magId = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M, 8);
+	unsigned char magId = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M);
 	printf("MAG whoami: %x",magId);
 	if (magId != LSM9DS1_MAG_ID) {
 		return false;
@@ -459,7 +431,7 @@ char I2C_InitSensors() {
 
 void setupAccel(accelRange_t range) {
 	debugPrint("setupAccel called");
-	unsigned char reg = readRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG6_XL, 8);
+	unsigned char reg = readRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG6_XL);
 	reg &= ~(0b00011000);
 	reg |= range;
 	printf("Setting range");
@@ -486,7 +458,7 @@ void setupAccel(accelRange_t range) {
 
 void setupMag(magGain_t gain) {
 	debugPrint("setupMag called");
-	unsigned char reg = readRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 8);
+	unsigned char reg = readRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M);
 	reg &= ~(0b01100000);
 	reg |= gain;
 	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, reg);
@@ -512,7 +484,7 @@ void setupMag(magGain_t gain) {
 
 void setupGyro(gyroScale_t scale) {
 	debugPrint("setupGyro called");
-	unsigned char reg = readRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG1_G, 8);
+	unsigned char reg = readRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG1_G);
 	reg &= ~(0b00011000);
 	reg |= scale;
 	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG1_G, reg);
@@ -539,7 +511,7 @@ AccelData I2C_getAccelData() {
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
-	uint8_t xlo = buffer[0];
+	uint8_t xlo = buffer[0];//each xhi/xlo is one half of the full 16-bit number
 	int32_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
 	int32_t yhi = buffer[3];
