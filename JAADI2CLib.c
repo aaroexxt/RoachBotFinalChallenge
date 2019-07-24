@@ -148,21 +148,6 @@ char startCondition() {
 	return true;
 }
 
-//Repeated start condition
-char repeated_start_condition() {
-	debugPrint("rep_startCondition");
-	delayUS(T1);
-	IO_setPortDirection(SDA, INPUT);
-	if (IO_readPort(SDA) == 0) { //NACK recieved which is a rip
-		return false;
-	}
-	IO_setPortDirection(SCL, INPUT);
-	delayUS(T2);
-	SDALOW();
-	delayUS(T1);
-	SCLLOW();
-	return (true);
-}
 
 //Allows clock stretching detection using pins
 char clock_stretching() {
@@ -406,7 +391,7 @@ unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned 
 * HIGHEST LEVEL OF ABSTRACTION (I2C Gyro/Accel/Mag Driver)
 *******/
  
-char I2C_initted = FALSE;
+char I2C_initted = false;
 
 //Top level abstractions
 char I2C_Init() {
@@ -433,15 +418,15 @@ char I2C_InitSensors() {
   	debugPrint("accel and mag soft reset OK");
   	delayMS(10); //wait 10ms
 
-  	unsigned char id = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG, 8);
-  	printf("ACCEL whoami: %x",id);
-	if (id != LSM9DS1_XG_ID) { //reeee id check failed
+  	unsigned char accelId = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG, 8);
+  	printf("ACCEL whoami: %x",accelId);
+	if (accelId != LSM9DS1_XG_ID) { //reeee accelId check failed
 		return false;
 	}
 
-	unsigned char idTwo = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M, 8);
-	printf("MAG whoami: %x",idTwo);
-	if (idTwo != LSM9DS1_MAG_ID) {
+	unsigned char magId = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M, 8);
+	printf("MAG whoami: %x",magId);
+	if (magId != LSM9DS1_MAG_ID) {
 		return false;
 	}
 
