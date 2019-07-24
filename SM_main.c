@@ -11,13 +11,12 @@
 
 //Microchip's specialized library
 #include <xc.h>
-#include <peripheral/ports.h>
 
 //A library to use the uc32 board
 #include "BOARD.h"
 #include "roach.h"
 #include "timers.h"
-#include "Roach_Top_Level_SM.h"
+#include "Roach_Top_Level_SM.c"
 #include "JAADMain.h"
 #include "JAADI2CLib.c"
 #include "JAADMOVLib.c"
