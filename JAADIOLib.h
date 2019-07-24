@@ -21,20 +21,24 @@
 
 #define SDA_LAT LATBbits.LATB12
 
-enum {
+//Define true and false because C is dumb
+#define true 1
+#define false 0
 
+//this enum stores the two constants for the IO_setPortDirection function
+enum {
 	INPUT,
 	OUTPUT
 };
 
-enum{
-
+//this enum stores the two constants for the IO_setPort function
+enum {
 	HIGH,
 	LOW
 };
 
-enum{
-
+//this enum stores the two constants for the potential ports
+enum {
 	SCL,
 	SDA
 };
