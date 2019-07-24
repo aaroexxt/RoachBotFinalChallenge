@@ -1,6 +1,6 @@
 /* 
  * File:   JAADSM.h
- * Author: Aaron
+ * Author: Daniel Lan
  *
  * Created on July 22, 2019, 4:58 PM
  */
@@ -14,7 +14,6 @@ extern "C" {
 
 #define SCL_TRIS TRISBbits.TRISB11
 //Serial Clock Pin ID
-
 #define SCL_BIT PORTBbits.RB11
 
 #define SCL_LAT LATBbits.LATB11
@@ -27,11 +26,13 @@ extern "C" {
 #define SDA_LAT LATBbits.LATB12
 
 enum {
+
 	INPUT,
 	OUTPUT
 };
 
 enum{
+
 	HIGH,
 	LOW
 };
@@ -67,6 +68,7 @@ int IO_readPort(int pin);
 
 
 #ifdef	__cplusplus
+
 }
 #endif
 

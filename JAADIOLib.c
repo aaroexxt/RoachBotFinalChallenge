@@ -1,6 +1,6 @@
 /* 
  * File:   JAADSM
- * Author: Aaron Becker
+ * Author: Daniel Lan
  *
  * Created on July 5, 2019, 1:32 PM
  */
@@ -14,27 +14,33 @@
 pinNumber equals to 1 if direction equals to 1, otherwise pinNumber equals to 0.
 setting the port's value to input or output
 */
-int IO_setPortDirection(int pin, int direction){
+int IO_setPortDirection(int pin, int direction) {
 	if (pin == SDA) {
-		if(direction == INPUT){
+
+		if (direction == INPUT) {
+
 			SDA_TRIS = 1;
+
 		} else {
+
 			SDA_TRIS = 0;
 		}
 	}
-	else{
-		if (direction == INPUT){
+
+	else {
+
+		if (direction == INPUT) {
 
 			SCL_TRIS = 1;
 		}
-		else{
+
+		else {
 
 			SCL_TRIS = 0;
 		}
 		
 	}
-
-
+	
 }
 
 /** @param[in] port ID number(pinNumber) and electricity value 1 or 0 (newValue). 
@@ -49,10 +55,10 @@ int IO_setPort(int pin, int newValue){
 		SDA_LAT = newValue;
 		
 	}
-	else{
+
+	else {
 		
 		SCL_LAT = newValue;
-		
 		
 	}
 
@@ -66,11 +72,11 @@ check if the input value is an input or output
 
 int IO_readPort(int pin){
 
-	if(pin == SDA){
+	if (pin == SDA){
 
 		return SDA_BIT;
 	}
-	else{
+	else {
 
 		return SCL_BIT;
 	}
