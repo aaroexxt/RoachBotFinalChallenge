@@ -122,7 +122,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             }
             break;
         case Orienting:
-            printf("Orienting")
+            printf("Orienting");
             if (MOV_isTurnFinished()) {
                 current_state = Driving;
                 MOV_initFwd(20);
@@ -145,6 +145,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             }
             break;
         case Finish:
+            break;
 
     }        
     return event;

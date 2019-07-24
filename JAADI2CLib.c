@@ -177,10 +177,10 @@ char stop_condition() {
 char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
     printf("Value: %d\r\n",value);
 
-    if (value == 1) {
-    	IO_setPortDirection(SDA, INPUT); //sda goes high
+    if (value == 0) {
+        SDALOW(); //sda goes low
     } else {
-    	SDALOW(); //sda goes low
+        IO_setPortDirection(SDA, INPUT); //sda goes high
     }
     delayUS(T2);
     IO_setPortDirection(SCL, INPUT); //pulse scl high
@@ -272,17 +272,20 @@ int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
     // Address device with read request and check that it acknowledges
     char nack;
     if (!write_byte(addr & 0b11111110, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1);
+    	debugPrint("WBADDR");
+        //return (-1);
     }
 
     //Write to register
     if (!write_byte(reg, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1);
+    	debugPrint("REG");
+        //return (-1);
     }
 
     //Write value
     if (!write_byte(value, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1);
+    	debugPrint("VAL");
+        //return (-1);
     }
 
     stop_condition();
@@ -297,25 +300,25 @@ unsigned char readRegister(unsigned int addr, unsigned char reg) {
 	// Address device with read request and check that it acknowledges
     char nack;
     if (!write_byte(addr & 0b11111110, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1); //make sure R/W bit is 0
+    	//return (-1); //make sure R/W bit is 0
     }
 
     //Read from register
     if (!write_byte(reg, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1);
+    	//return (-1);
     }
 
     startCondition(); //repeat start condition
 
     if (!write_byte(addr | 1, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
-    	return (-1); //^^ make sure addr LSB is 1 to make RW bit high for reading
+    	//return (-1); //^^ make sure addr LSB is 1 to make RW bit high for reading
     }
 
     //Read from register
     unsigned char value;
 
     if (!read_byte(&value, 0)) { //no ACK when reading
-    	return -1; //^ use pointer
+    	//return -1; //^ use pointer
     }
 
     stop_condition();
@@ -383,7 +386,7 @@ char I2C_InitSensors() {
 	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG8, 0x05);
 
 	// soft reset & reboot magnetometer
-  	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C);
+  	printf("MAGWRITEREG %d\r\n",writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C));
 
   	debugPrint("accel and mag soft reset OK");
   	delayMS(10); //wait 10ms
