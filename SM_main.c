@@ -115,13 +115,12 @@ int main(void)
 
         if (TIMERS_IsTimerExpired(14)){
             TIMERS_InitTimer(14, 1000);
-            printf("ST: %d\r\n", state);
             if(state == LOW){
                 state = HIGH;
             } else {
                 state = LOW;
             }
-            IO_setPort(SDA, state);
+            IO_setPort(SDA, !state);
             IO_setPort(SCL, state);
             
             printf("SDALAT: %d",SDA_LAT);

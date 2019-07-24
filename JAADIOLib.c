@@ -34,7 +34,6 @@ set the value to either 1 (high voltage) or 0 (low voltage)
 */
 
 int IO_setPort(int pin, int newValue) {
-    printf("PIN: %d SDA: %d",pin,SDA);
 	if (pin == SDA) {
 		if(SDA_TRIS == 0){
 			SDA_LAT = (newValue == HIGH) ? 1 : 0;

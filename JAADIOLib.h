@@ -8,18 +8,18 @@
 #ifndef JAADIOLIB_H
 #define	JAADIOLIB_H
 
-#define SCL_TRIS TRISBbits.TRISB11
+#define SCL_TRIS TRISBbits.TRISB12
 //Serial Clock Pin ID
-#define SCL_BIT PORTBbits.RB11
+#define SCL_BIT PORTBbits.RB12
 
-#define SCL_LAT LATBbits.LATB11
+#define SCL_LAT LATBbits.LATB12
 
 
-#define SDA_TRIS TRISBbits.TRISB12
+#define SDA_TRIS TRISBbits.TRISB9
 // Serial Data Pin ID
-#define SDA_BIT PORTBbits.RB12
+#define SDA_BIT PORTBbits.RB9
 
-#define SDA_LAT LATBbits.LATB12
+#define SDA_LAT LATBbits.LATB9
 
 //Define true and false because C is dumb
 #ifndef true
