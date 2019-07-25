@@ -6,7 +6,7 @@
  */
 
 #include "JAADMOVLib.h"
-#include <time.h>
+#include "timers.h"
 #define turnP 0.2
 #define driveP 0.2
 #define timerId 0
@@ -33,12 +33,12 @@ void MOV_initTurn(int degrees) {
     turnSetpoint = degrees;
     isFinishedTurn = 0;
     turnTimeCheck = 0;
-    prevClockTime = clock();
+    prevClockTime = TIMERS_GetTime();
 }
 
 int MOV_updateTurn(void) {
     gyroAngle = 0; //will change to update gyroAngle
-    currentClockTime = clock();
+    currentClockTime = TIMERS_GetTime();
     turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime);
     int deltaSetpoint = turnSetpoint - turnCurrentPos;
 
@@ -81,12 +81,12 @@ void MOV_initFwd(int distance){
     driveCurrentPos = 0;
     isFinishedDrive = 0;
     driveTimeCheck = 0;
-    prevClockTime = clock();
+    prevClockTime = TIMERS_GetTime();
 }
 
 int MOV_updateFwd(void){
     acc = 0; //change to accelerometer value
-    currentClockTime = clock();
+    currentClockTime = TIMERS_GetTime();
     vel += acc * (currentClockTime - prevClockTime);
     driveCurrentPos += vel * (currentClockTime - prevClockTime);
     int deltaSetpoint = driveSetpoint - driveCurrentPos;
