@@ -105,10 +105,10 @@ int main(void)
 
         //Print the values for debugging
         I2C_printAccel(currentAccel);
-        I2C_printGyro(currentGyro);
+//        I2C_printGyro(currentGyro);
         //I2C_printMag(currentMag);
         
-        delayMS(500);
+        delayMS(100);
         //continuous services (event checkers):
         /*Event this_event = CheckForAllEvents();
 

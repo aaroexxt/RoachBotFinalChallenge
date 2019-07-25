@@ -461,11 +461,11 @@ AccelData I2C_getAccelData() {
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
-	int xlo = buffer[0];//each xhi/xlo is one half of the full 16-bit number
+	uint8_t xlo = buffer[0];//each xhi/xlo is one half of the full 16-bit number
 	int32_t xhi = buffer[1];
-	int ylo = buffer[2];
+	uint8_t ylo = buffer[2];
 	int32_t yhi = buffer[3];
-	int zlo = buffer[4];
+	uint8_t zlo = buffer[4];
 	int32_t zhi = buffer[5];
 
 	// Shift values to create properly formed integer (low byte first)
