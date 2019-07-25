@@ -62,15 +62,19 @@ char debugMode = false;
 *****/
 
 void debugPrint(char str[]) {
-	puts(str);
-	printf("\r\n");
+    if (debugMode == true) {
+        puts(str);
+        printf("\r\n");
+    }
 }
 
 void debugPrintArray(char array[], int len) {
-	int i = 0;
-	for (i = 0; i<len; i++) {
-		printf("i=%d, e=%d \r\n", i, array[i]);
-	}
+	if (debugMode == true) {
+        int i = 0;
+        for (i = 0; i<len; i++) {
+            printf("i=%d, e=%d \r\n", i, array[i]);
+        }
+    }
 }
 
 void I2C_setDebugOn(void) {
@@ -114,6 +118,7 @@ void SCLLOW(void) {
 }
 
 void delayUS(unsigned long delay_us) {
+    return;
    unsigned long DelayStartTime;
    
    DelayStartTime = ReadCoreTimer(); //read core timer into delay start time
@@ -174,7 +179,7 @@ unsigned char rxByte(char ack) {
 		while (IO_readPort(SCL) == 0) {};    // wait for any SCL clock stretching
 		//debugPrint("postClkStretch rx");
 
-		if (IO_readPort(SDA) != 0) { //check for data byte
+		if (IO_readPort(SDA) == HIGH) { //check for data byte
 			byte |= 1;
 		}
 		SCLLOW();
@@ -193,13 +198,13 @@ unsigned char rxByte(char ack) {
 	delayUS(T1);
 	SDALOW();
 
-	printf("rxByte: 0x%x",byte);
+	//printf("rxByte: 0x%x\r\n",byte);
 	return byte;
 }
 
 unsigned char txByte(unsigned char byte) {
 	debugPrint("txByte");
-	printf("Byte: 0x%x\r\n",byte);
+	//printf("Byte: 0x%x\r\n",byte);
 
 	int bitCounter = 0;
 	static unsigned char ack;
@@ -221,8 +226,8 @@ unsigned char txByte(unsigned char byte) {
 	SCLHIGH();
 	delayUS(T1);
 
-	ack = IO_readPort(SDA);          // possible ACK bit
-	printf("txACK: %d\r\n",ack);
+	ack = (IO_readPort(SDA) == HIGH) ? 1 : 0;          // possible ACK bit
+	//printf("txACK: %d\r\n",ack);
 
 	SCLLOW();
 	//DONT KNOW WHETHER THE FOLLOWING 2 LINES ARE REQUIRED
@@ -332,7 +337,7 @@ char I2C_InitSensors() {
 	debugPrint("I2C_INITSENSORS BEGIN");
 	// soft reset & reboot accel/gyro
 	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG8, 0x05);
-
+   
 	// soft reset & reboot magnetometer
   	printf("MAGWRITEREG %d\r\n",writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C));
 
@@ -344,7 +349,7 @@ char I2C_InitSensors() {
 	if (accelId != LSM9DS1_XG_ID) { //reeee accelId check failed
 		return false;
 	}
-
+    
 	unsigned char magId = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M);
 	printf("MAG whoami: %x",magId);
 	if (magId != LSM9DS1_MAG_ID) {
