@@ -15,7 +15,6 @@
 
 //Enum for Main States
 enum {
-    //your states here
     Aligning,
     Orienting,
     Driving,
