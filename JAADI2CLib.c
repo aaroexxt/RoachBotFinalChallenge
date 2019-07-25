@@ -68,7 +68,7 @@ void debugPrint(char str[]) {
     }
 }
 
-void debugPrintArray(char array[], int len) {
+void debugPrintArray(int array[], int len) {
 	if (debugMode == true) {
         int i = 0;
         for (i = 0; i<len; i++) {
@@ -261,7 +261,7 @@ int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
     return true;
 }
 
-unsigned char readRegister(unsigned int addr, unsigned char reg) {
+int readRegister(unsigned int addr, unsigned char reg) {
 
 	startCondition();
 
@@ -284,7 +284,7 @@ unsigned char readRegister(unsigned int addr, unsigned char reg) {
     return byte; //return pointerized value
 }
 
-unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bytesToRead) {
+unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, int *buffer, int bytesToRead) {
 
 	startCondition();
 
@@ -457,15 +457,15 @@ void setupGyro(gyroScale_t scale) {
 
 AccelData I2C_getAccelData() {
 	debugPrint("getAccelData called"); //debug print
-	unsigned char buffer[6];
+	int buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
-	uint8_t xlo = buffer[0];//each xhi/xlo is one half of the full 16-bit number
+	int xlo = buffer[0];//each xhi/xlo is one half of the full 16-bit number
 	int32_t xhi = buffer[1];
-	uint8_t ylo = buffer[2];
+	int ylo = buffer[2];
 	int32_t yhi = buffer[3];
-	uint8_t zlo = buffer[4];
+	int zlo = buffer[4];
 	int32_t zhi = buffer[5];
 
 	// Shift values to create properly formed integer (low byte first)
@@ -493,7 +493,7 @@ AccelData I2C_getAccelData() {
 MagData I2C_getMagData() {
 	debugPrint("getMagData called"); //debug print
 	// Read the magnetometer
-	unsigned char buffer[6];
+	int buffer[6];
 	readRegisterBuffer(MAGADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_M, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
@@ -524,7 +524,7 @@ MagData I2C_getMagData() {
 GyroData I2C_getGyroData() {
 	debugPrint("getMagData called"); //debug print
 	// Read gyro
-	unsigned char buffer[6];
+	int buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_G, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array

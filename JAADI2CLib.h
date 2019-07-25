@@ -4,7 +4,7 @@
  *
  * Created on July 22, 2019, 4:58 PM
  */
-
+#include "GenericTypeDefs.h"
 #ifndef JAADI2CLIB_H
 #define	JAADI2CLIB_H
 
@@ -136,9 +136,9 @@ typedef struct {
 } MagData;
 
 typedef struct {
-	int x;
-    int y;
-    int z;
+	int16_t x;
+    int16_t y;
+    int16_t z;
 } GyroData;
 
 

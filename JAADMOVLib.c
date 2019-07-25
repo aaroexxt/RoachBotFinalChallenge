@@ -53,6 +53,7 @@ int MOV_updateTurn(void) {
         return 0;
         isFinishedTurn = 1;
     }
+    printf("%d\r\n", turnCurrentPos);
     prevClockTime = currentClockTime;
     return turnP * deltaSetpoint;
 }

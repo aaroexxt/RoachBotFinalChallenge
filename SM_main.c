@@ -86,6 +86,7 @@ int main(void)
     BOARD_Init();
     Roach_Init();
     TIMERS_Init();
+    MOV_initTurn(90);
     
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);
@@ -100,14 +101,14 @@ int main(void)
     while (1) {
         currentAccel = I2C_getAccelData();
         currentGyro = I2C_getGyroData();
-        currentMag = I2C_getMagData();
+//        currentMag = I2C_getMagData();
 
         //Print the values for debugging
-        //I2C_printAccel(currentAccel);
+        I2C_printAccel(currentAccel);
         I2C_printGyro(currentGyro);
         //I2C_printMag(currentMag);
         
-        delayMS(100);
+        delayMS(500);
         //continuous services (event checkers):
         /*Event this_event = CheckForAllEvents();
 
