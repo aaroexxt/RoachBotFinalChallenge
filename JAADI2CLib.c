@@ -145,7 +145,7 @@ char startCondition() {
 	delayUS(T1);
 	SCLLOW();
 	delayUS(T1);
-	return;
+	return true;
 }
 
 //End of frame condition
@@ -156,7 +156,7 @@ char stopCondition() {
   	delayUS(T1);
   	SDAHIGH();
   	delayUS(T1);
-  	return;
+  	return true;
 }
 
 unsigned char rxByte(char ack) {
@@ -193,13 +193,13 @@ unsigned char rxByte(char ack) {
 	delayUS(T1);
 	SDALOW();
 
-	printf("rxByte: %x",byte);
+	printf("rxByte: 0x%x",byte);
 	return byte;
 }
 
 unsigned char txByte(unsigned char byte) {
 	debugPrint("txByte");
-	printf("Byte: %x\r\n",byte);
+	printf("Byte: 0x%x\r\n",byte);
 
 	int bitCounter = 0;
 	static unsigned char ack;
