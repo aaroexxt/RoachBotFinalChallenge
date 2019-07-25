@@ -55,18 +55,16 @@ Event CheckBothBumperPressed(void){
         firstCheck = 1;
     }
     if(firstCheck){
+        firstCheck = 0;
         if(TIMERS_IsTimerExpired(0)){
                 if(current_fl_bumper_state == BUMPER_TRIPPED && current_fr_bumper_state == BUMPER_TRIPPED){
                     return BOTH_BUMPER_PRESSED;
                 }
-            }
-            firstCheck = 0;
         }
     }
     previous_fr_bumper_state = current_fr_bumper_state;
     previous_fl_bumper_state = current_fl_bumper_state;
     return NO_EVENT;
-
 }
 Event CheckForBumperEvents(void)
 {

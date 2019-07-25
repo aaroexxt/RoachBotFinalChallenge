@@ -96,12 +96,8 @@ void I2C_printMag(MagData data) {
 LOWEST LEVEL FUNCTIONS
 ******/
 
-void SDAHIGH(void) {
-	IO_setPortDirection(SDA, INPUT);
-} //Pullup resistor should take care of this
-void SCLHIGH(void) {
-	IO_setPortDirection(SCL, INPUT);
-} //same with this
+void SDAHIGH(void) {} //Pullup resistor should take care of this
+void SCLHIGH(void) {} //same with this
 
 void SDALOW(void) {
 	IO_setPortDirection(SDA, OUTPUT);
@@ -138,98 +134,130 @@ void delayMS(unsigned long delay_ms) {
 
 //Start condition, beginning of frame
 char startCondition() {
-	SDAHIGH();             // i2c start bit sequence
-	SCLHIGH();
-	delayUS(T1);
-	SDALOW();
-	delayUS(T1);
-	SCLLOW();
-	delayUS(T1);
-	return;
+	debugPrint("startCondition");
+	IO_setPortDirection(SDA, INPUT); //set sda to input so that it gets pulled high
+	if (IO_readPort(SDA) == 0) { //Other device is pulling it low for some reason?
+		return false;
+	}
+	SDALOW(); //set sda low
+	delayUS(T1); //delay 4uS
+	SCLLOW(); //set scl low
+	return true;
+}
+
+
+//Allows clock stretching detection using pins
+char clock_stretching() {
+	debugPrint("clkStretching");
+	int retry;
+	IO_setPortDirection(SCL, INPUT); //make sure SCL can be pulled high
+	for (retry = 0; retry < CLOCK_STRETCHING_RETRY_MAX; retry++) {
+		if (IO_readPort(SCL)) { //check if slave has released the SCL line
+			return true;
+		}
+		delayUS(T1);
+	}
+	return (false);
 }
 
 //End of frame condition
-char stopCondition() {
-	SDALOW();             // i2c stop bit sequence
-	delayUS(T1);
-  	SCLHIGH();
-  	delayUS(T1);
-  	SDAHIGH();
-  	delayUS(T1);
-  	return;
+char stop_condition() {
+	debugPrint("stopCondition");
+    delayUS(T1);
+    SDALOW();
+    IO_setPortDirection(SCL, INPUT);
+    delayUS(T1);
+    if (!clock_stretching()) return (false); //check for clock stretching
+    IO_setPortDirection(SDA, INPUT); //allow sda to go high
+
+    return (IO_readPort(SDA) == 0); //check if sda is being pulled low
 }
 
-unsigned char rxByte(char ack) {
-	debugPrint("rxByte");
-	int bitCounter = 0;
-	unsigned char byte = 0; //
+//Write a single bit to device
+char write_bit(char value) { //should write a single bit but can't because C doesn't have bool type lol
+    printf("Value: %d\r\n",value);
 
-	SDAHIGH(); //set data line as input in preparation to read
-	for (bitCounter = 0; bitCounter < 8; bitCounter++) {
-		delayUS(T1); //wait for data to settle
-		SCLHIGH(); //clock high
-		byte <<= 1;
-
-		//debugPrint("preClkStretch rx");
-		while (IO_readPort(SCL) == 0) {};    // wait for any SCL clock stretching
-		//debugPrint("postClkStretch rx");
-
-		if (IO_readPort(SDA) != 0) { //check for data byte
-			byte |= 1;
-		}
-		SCLLOW();
-	} 
-
-	//THIS COULD BE FLIPPED, NOT SURE
-	if (ack) {
-		SDALOW();
-	} else {
-		SDAHIGH();
-	}
-
-	SCLHIGH();
-	delayUS(T1);             // send (N)ACK bit
-	SCLLOW();
-	delayUS(T1);
-	SDALOW();
-
-	printf("rxByte: %x",byte);
-	return byte;
+    if (value == 0) {
+        SDALOW(); //sda goes low
+    } else {
+        IO_setPortDirection(SDA, INPUT); //sda goes high
+    }
+    delayUS(T2);
+    IO_setPortDirection(SCL, INPUT); //pulse scl high
+    delayUS(T1);
+    if (!clock_stretching()) { //check for clock stretching
+    	return false;
+    }
+    SCLLOW(); //and then pulse scl low
+    return (true);
 }
 
-unsigned char txByte(unsigned char byte) {
-	debugPrint("txByte");
-	printf("Byte: %x\r\n",byte);
+//Read a single bit from device
+char read_bit(char *value) { //it's pointer time bois
+    debugPrint("readBit");
 
-	int bitCounter = 0;
-	static unsigned char ack;
+    IO_setPortDirection(SDA, INPUT);
+    delayUS(T2);
+    IO_setPortDirection(SCL, INPUT);
+    delayUS(T1);
+    if (!clock_stretching()) { //wait for clock stretching
+    	return false;
+    }
+    char portVal = IO_readPort(SDA);
+    value = &portVal;
+    SCLLOW();
+    return true;
+}
 
-	for (bitCounter = 0; bitCounter < 8; bitCounter++) {
-		if (byte & 0x80) { //only get the high order bit
-			SDAHIGH();
-		} else {
-			SDALOW();
+
+/******
+* MEDIUM LOW LEVEL FUNCTIONS
+* yo these functions basically use the lowest level to build up to bytes (which will then be used in the frame)
+******/
+
+//Write a single byte (will return NACK bit so we'll know if it returned successfully)
+char write_byte(unsigned char byte, unsigned char *nack) {
+	int i = 0;
+
+	for (i = 0; i < 8; i++) { //for each bit in the byte
+		if (!write_bit(byte & 0x80)) { //only take the MSB via bitwise and
+			return false;
 		}
-		SCLHIGH();
-		delayUS(T1);
-		SCLLOW();
-		byte <<= 1; //shift byte by 1
+	  	byte <<= 1; //bitshift it left (will wrap, but that's ok)
 	}
+	return (read_bit(nack)); //Read ACK bit (MUST HAPPEN)
+}
 
-	//read ACK bit
-	SDAHIGH();
-	SCLHIGH();
-	delayUS(T1);
+char read_byte(unsigned char *finalByte, char ack) {
+    unsigned char value;
+    unsigned char byte = 0;
+    int i = 0;
 
-	ack = IO_readPort(SDA);          // possible ACK bit
-	printf("txACK: %d\r\n",ack);
+    for (i = 0; i < 8; i++) {
+		if (!read_bit(&value)) {
+			return (false); //if failed to read just return false
+		}
+		byte = (byte << 1) | value; //bitshift it to the proper place and bitwise OR with value to return current full byte (LSB to MSB)
+    }
+    finalByte = &byte;
+    return (write_bit(!ack)); //Send ACK bit (MUST HAPPEN)
+}
 
-	SCLLOW();
-	//DONT KNOW WHETHER THE FOLLOWING 2 LINES ARE REQUIRED
-	delayUS(T1);
-	SDALOW();
+char read_bytesBuffer(unsigned char *buffer, int bytes) {
+    unsigned char value;
+    int i = 0;
 
-	return ((ack == 0) ? true : false); //low ACK bit indicates success
+    for (i = 0; i < bytes; i++) {
+    	buffer[i] = 0; //reset buffer and value
+    	value = 0;
+
+		if (!read_byte(&value, ((i < bytes-1) ? 1 : 0))) { //if i<bytes then send ACK
+			return (false); //if failed to read just return false
+		}
+		buffer[i] = value; //write it to the proper portion of the buffer
+    }
+    //Send the final ACK
+    return true;//(write_bit(0)); //return if the device will accept a ACK bit
 }
 
 /******
@@ -242,16 +270,25 @@ int writeRegister(unsigned int addr, unsigned char reg, unsigned char value) {
     startCondition();
 
     // Address device with read request and check that it acknowledges
-    addr <<= 1; //shift address to proper position
-    txByte(addr);
+    char nack;
+    if (!write_byte(addr & 0b11111110, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	debugPrint("WBADDR");
+        //return (-1);
+    }
 
     //Write to register
-    txByte(reg);
+    if (!write_byte(reg, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	debugPrint("REG");
+        //return (-1);
+    }
 
     //Write value
-   	txByte(value);
+    if (!write_byte(value, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	debugPrint("VAL");
+        //return (-1);
+    }
 
-    stopCondition();
+    stop_condition();
 
     return true;
 }
@@ -261,46 +298,61 @@ unsigned char readRegister(unsigned int addr, unsigned char reg) {
 	startCondition();
 
 	// Address device with read request and check that it acknowledges
-    addr <<= 1; //shift address to proper position
-    txByte(addr);
+    char nack;
+    if (!write_byte(addr & 0b11111110, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	//return (-1); //make sure R/W bit is 0
+    }
 
-    //Write register byte
-    txByte(reg);
+    //Read from register
+    if (!write_byte(reg, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	//return (-1);
+    }
 
     startCondition(); //repeat start condition
 
-    txByte(addr | 0b00000001);
+    if (!write_byte(addr | 1, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	//return (-1); //^^ make sure addr LSB is 1 to make RW bit high for reading
+    }
 
     //Read from register
-    unsigned char byte = rxByte(0); //ACK 0
+    unsigned char value;
 
-    stopCondition();
+    if (!read_byte(&value, 0)) { //no ACK when reading
+    	//return -1; //^ use pointer
+    }
 
-    return byte; //return pointerized value
+    stop_condition();
+
+    return value; //return pointerized value
 }
 
-unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bytesToRead) {
+unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bytes) {
 
 	startCondition();
 
 	// Address device with read request and check that it acknowledges
-	addr <<= 1; //shift address to proper position
-    txByte(addr);
+    char nack;
+    if (!write_byte(addr & 0b11111110, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1); //make sure R/W bit is 0
+    }
 
     //Read from register
-    txByte(reg);
+    if (!write_byte(reg, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1);
+    }
 
     startCondition(); //repeat start condition
 
-    txByte(addr | 0b00000001);
-
-    //Read from register
-    int i = 0;
-    for (i = 0; i < bytesToRead; i++) {
-    	buffer[i] = rxByte((i != bytesToRead-1) ? 1 : 0); //ack should be 0 on last byte; otherwise 1
+    if (!write_byte(addr | 1, &nack) || nack) { //if nack returns, then no device found or other issue with protocol
+    	return (-1); //^^ make sure addr bit 0 is 1 to make RW bit high for reading
     }
 
-    stopCondition();
+    //Read from register
+    if (!read_bytesBuffer(buffer, bytes)) { //if nack returns, then no device found or other issue with protocol
+    	return -1; //^ use pointer, internal register of device should increment automatically
+    }
+
+    stop_condition();
 
     return true; //return pointerized value
 }
@@ -452,7 +504,7 @@ void setupGyro(gyroScale_t scale) {
 
 AccelData I2C_getAccelData() {
 	debugPrint("getAccelData called"); //debug print
-	unsigned char buffer[6];
+	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
@@ -488,7 +540,7 @@ AccelData I2C_getAccelData() {
 MagData I2C_getMagData() {
 	debugPrint("getMagData called"); //debug print
 	// Read the magnetometer
-	unsigned char buffer[6];
+	char buffer[6];
 	readRegisterBuffer(MAGADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_M, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
@@ -519,7 +571,7 @@ MagData I2C_getMagData() {
 GyroData I2C_getGyroData() {
 	debugPrint("getMagData called"); //debug print
 	// Read gyro
-	unsigned char buffer[6];
+	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_G, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array

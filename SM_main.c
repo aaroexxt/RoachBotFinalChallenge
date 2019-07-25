@@ -16,7 +16,7 @@
 #include "BOARD.h"
 #include "roach.h"
 #include "timers.h"
-#include "Roach_Top_Level_SM.c"
+#include "Roach_Top_Level_SM.h"
 #include "JAADMain.h"
 #include "JAADI2CLib.c"
 #include "JAADMOVLib.c"
@@ -88,7 +88,7 @@ int main(void)
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);
     
-    printf("I2CINIT %d",I2C_Init());
+    printf("\r\n---------\r\nI2CINIT %d\r\n---------\r\n",I2C_Init());
     I2C_setDebugOn();
 
 
