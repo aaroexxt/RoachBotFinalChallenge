@@ -105,12 +105,12 @@ void SCLHIGH(void) {
 
 void SDALOW(void) {
 	IO_setPortDirection(SDA, OUTPUT);
-	//IO_setPort(SDA, LOW);
+	IO_setPort(SDA, LOW);
 }
 
 void SCLLOW(void) {
 	IO_setPortDirection(SCL, OUTPUT);
-	//IO_setPort(SCL, LOW);
+	IO_setPort(SCL, LOW);
 }
 
 void delayUS(unsigned long delay_us) {
