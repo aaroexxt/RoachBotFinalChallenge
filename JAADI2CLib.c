@@ -369,7 +369,7 @@ char I2C_InitSensors() {
 	debugPrint("Written basic configs to mag and accel");
 
 	// Set default ranges for the various sensors  
-	setupAccel(LSM9DS1_ACCELRANGE_2G);
+	setupAccel(LSM9DS1_ACCELRANGE_2G); //because the roach is small, just use the smallest possible values for scaling
 	setupMag(LSM9DS1_MAGGAIN_4GAUSS);
 	setupGyro(LSM9DS1_GYROSCALE_245DPS);
 	debugPrint("Default ranging done for sensors");
@@ -477,9 +477,9 @@ AccelData I2C_getAccelData() {
 	int16_t intermediateZ = (signed short)zhi;
 
 	//Float conversion
-	float realX = 1.0*intermediateX;
-	float realY = 1.0*intermediateY;
-	float realZ = 1.0*intermediateZ;
+	float realX = (float)intermediateX;
+	float realY = (float)intermediateY;
+	float realZ = (float)intermediateZ;
 
 	// Unit conversion
 	realX *= _accel_mg_lsb;
@@ -524,9 +524,9 @@ MagData I2C_getMagData() {
 	int16_t intermediateZ = (signed short)zhi;
 
 	//Float conversion
-	float realX = 1.0*intermediateX;
-	float realY = 1.0*intermediateY;
-	float realZ = 1.0*intermediateZ;
+	float realX = (float)intermediateX;
+	float realY = (float)intermediateY;
+	float realZ = (float)intermediateZ;
 	
 	// Unit conversion
 	realX *= _mag_mgauss_lsb;
@@ -566,9 +566,9 @@ GyroData I2C_getGyroData() {
 	int16_t intermediateZ = (signed short)zhi;
 
 	//Float conversion
-	float realX = 1.0*intermediateX;
-	float realY = 1.0*intermediateY;
-	float realZ = 1.0*intermediateZ;
+	float realX = (float)intermediateX;
+	float realY = (float)intermediateY;
+	float realZ = (float)intermediateZ;
 
 	// Unit conversion
 	realX *= _gyro_dps_digit;
