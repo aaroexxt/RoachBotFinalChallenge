@@ -576,7 +576,7 @@ GyroData I2C_getGyroData() {
 	realZ *= _gyro_dps_digit;
 
 	//Create gyroData struct
-	GyroData data = {xhi, yhi, zhi};
+	GyroData data = {realX, realY, realZ};
 	return data;
 }
 

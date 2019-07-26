@@ -98,7 +98,7 @@ int main(void)
 //    Initialize_RoachStateMachine();
 
     while (1) {
-//        currentAccel = I2C_getAccelData();
+        currentAccel = I2C_getAccelData();
         currentGyro = I2C_getGyroData();
 //        currentMag = I2C_getMagData();
         if(!MOV_isTurnFinished()){
@@ -109,8 +109,8 @@ int main(void)
             
         }
         //Print the values for debugging
-//        I2C_printAccel(currentAccel);
-        I2C_printGyro(currentGyro);
+        I2C_printAccel(currentAccel);
+//        I2C_printGyro(currentGyro);
         //I2C_printMag(currentMag);
         delayMS(100);
         //continuous services (event checkers):
