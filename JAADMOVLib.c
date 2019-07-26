@@ -7,6 +7,7 @@
 
 #include "JAADMOVLib.h"
 #include "timers.h"
+#include "JAADI2CLib.h"
 #define turnP 0.2
 #define driveP 0.2
 #define timerId 0
@@ -26,6 +27,7 @@ char turnTimeCheck = 0;
 
 int prevClockTime = 0;
 int currentClockTime = 0;
+GyroData data;
 
 void MOV_initTurn(int degrees) {
     turnCount = 0;
@@ -37,9 +39,10 @@ void MOV_initTurn(int degrees) {
 }
 
 int MOV_updateTurn(void) {
-    gyroAngle = 0; //will change to update gyroAngle
+    data = I2C_getGyroData();
+    gyroAngle = (float) (360 / 190) * data.z; //will change to update gyroAngle
     currentClockTime = TIMERS_GetTime();
-    turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime);
+    turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime) / 1000;
     int deltaSetpoint = turnSetpoint - turnCurrentPos;
 
     if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !turnTimeCheck){
