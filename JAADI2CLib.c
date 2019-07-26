@@ -4,7 +4,7 @@
  *
  * Created on July 5, 2019, 1:32 PM
  * 
- * Good links that I used to write this:
+ * Good links that I used as references when writing this:
  * https://github.com/mikaelpatel/Arduino-TWI/blob/master/src/Software/TWI.h
  * https://github.com/bitbank2/Multi_BitBang/blob/40bb8210b8423d5daf0cd90062e5b8e4404a7a96/src/Multi_BitBang.cpp
  * http://www.circuitbasics.com/basics-of-the-i2c-communication-protocol/
@@ -18,7 +18,6 @@
 /*
 I2C COMMUNICATION LETS GET IT
 
-
 START:
 SDA goes high -> low before SCL high -> low
 STOP:
@@ -27,9 +26,6 @@ ADDRESS:
 7 or 10 bit sequence (will be 7) that identifies the slave
 
 REQUIRES PULL UP RESISTORS
-
-
-
 */
 
 //require the i2c lib
@@ -88,15 +84,15 @@ void I2C_setDebugOff(void) {
 }
 
 void I2C_printAccel(AccelData data) {
-	printf("(AccReading) x: %d, y: %d, z: %d \r\n", data.x, data.y, data.z);
+	printf("(AccReading) x: %.3f, y: %.3f, z: %.3f \r\n", data.x, data.y, data.z);
 }
 
 void I2C_printGyro(GyroData data) {
-	printf("(GyroReading) x: %d, y: %d, z: %d \r\n", data.x, data.y, data.z);
+	printf("(GyroReading) x: %.3f, y: %.3f, z: %.3f \r\n", data.x, data.y, data.z);
 }
 
 void I2C_printMag(MagData data) {
-	printf("(MagReading) x: %d, y: %d, z: %d \r\n", data.x, data.y, data.z);
+	printf("(MagReading) x: %.3f, y: %.3f, z: %.3f \r\n", data.x, data.y, data.z);
 }
 /******
 LOWEST LEVEL FUNCTIONS
@@ -476,9 +472,9 @@ AccelData I2C_getAccelData() {
 	zhi <<= 8; zhi |= zlo;
 
 	// Fix two's complement
-	int16_t realX = (signed short)xhi;
-	int16_t realY = (signed short)yhi;
-	int16_t realZ = (signed short)zhi;
+	float realX = (float)(signed short)xhi;
+	float realY = (float)(signed short)yhi;
+	float realZ = (float)(signed short)zhi;
 
 	// Unit conversion
 	realX *= _accel_mg_lsb;
@@ -518,9 +514,9 @@ MagData I2C_getMagData() {
 	zhi <<= 8; zhi |= zlo;
 
 	// Fix two's complement
-	int16_t realX = (signed short)xhi;
-	int16_t realY = (signed short)yhi;
-	int16_t realZ = (signed short)zhi;
+	float realX = (float)(signed short)xhi;
+	float realY = (float)(signed short)yhi;
+	float realZ = (float)(signed short)zhi;
 	
 	// Unit conversion
 	realX *= _mag_mgauss_lsb;
@@ -555,9 +551,9 @@ GyroData I2C_getGyroData() {
 	zhi <<= 8; zhi |= zlo;
 
 	// Fix two's complement
-	int16_t realX = (signed short)xhi;
-	int16_t realY = (signed short)yhi;
-	int16_t realZ = (signed short)zhi;
+	float realX = (float)(signed short)xhi;
+	float realY = (float)(signed short)yhi;
+	float realZ = (float)(signed short)zhi;
 
 	// Unit conversion
 	realX *= _gyro_dps_digit;
