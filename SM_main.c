@@ -78,6 +78,7 @@ void PrintEvent(Event event)
 AccelData currentAccel;
 GyroData currentGyro;
 MagData currentMag;
+int mov;
 int main(void)
 {
     
@@ -102,17 +103,19 @@ int main(void)
         currentGyro = I2C_getGyroData();
 //        currentMag = I2C_getMagData();
         if(!MOV_isTurnFinished()){
-            MOV_updateTurn();
-            Roach_LeftMtrSpeed(50);
-            Roach_RightMtrSpeed(50);
+            mov = MOV_updateTurn();
+            Roach_LeftMtrSpeed(-mov);
+            Roach_RightMtrSpeed(-mov);
         } else {
-            
+            printf("DONE");
+            Roach_LeftMtrSpeed(0);
+            Roach_RightMtrSpeed(0);
         }
         //Print the values for debugging
-        I2C_printAccel(currentAccel);
+//        I2C_printAccel(currentAccel);
 //        I2C_printGyro(currentGyro);
         //I2C_printMag(currentMag);
-        delayMS(100);
+//        delayMS(100);
         //continuous services (event checkers):
         /*Event this_event = CheckForAllEvents();
 

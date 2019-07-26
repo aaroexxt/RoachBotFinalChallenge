@@ -8,18 +8,19 @@
 #include "JAADMOVLib.h"
 #include "timers.h"
 #include "JAADI2CLib.h"
-#define turnP 0.2
+#define turnP 1.3
 #define driveP 0.2
-#define timerId 0
-#define checkTime 1000
+#define timerId 5
+#define checkTime 1500
+#define threshold 5
 
 /*******
 * TURN CODE
 *******/
 
 //Variables to track state of turn
-int turnCurrentPos = 0;
-int gyroAngle = 0;
+float turnCurrentPos = 0;
+float gyroAngle = 0;
 int turnSetpoint = 0;
 char isFinishedTurn = 0;
 int turnCount = 0;
@@ -28,6 +29,7 @@ char turnTimeCheck = 0;
 int prevClockTime = 0;
 int currentClockTime = 0;
 GyroData data;
+AccelData fwdData;
 
 void MOV_initTurn(int degrees) {
     turnCount = 0;
@@ -40,24 +42,38 @@ void MOV_initTurn(int degrees) {
 
 int MOV_updateTurn(void) {
     data = I2C_getGyroData();
-    gyroAngle = (float) (360 / 190) * data.z; //will change to update gyroAngle
+    gyroAngle = (360.0 / 380.0) * data.z; //will change to update gyroAngle
     currentClockTime = TIMERS_GetTime();
     turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime) / 1000;
     int deltaSetpoint = turnSetpoint - turnCurrentPos;
 
-    if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !turnTimeCheck){
+    if (deltaSetpoint < threshold && deltaSetpoint > - threshold && !turnTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
         turnTimeCheck = 1;
     }
     
-    if ((deltaSetpoint > 10 || deltaSetpoint < - 10) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck) {
+    if ((deltaSetpoint > threshold || deltaSetpoint < - threshold) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck) {
         turnTimeCheck = 0;
-    } else if((deltaSetpoint < 10 && deltaSetpoint > - 10) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck){
-        return 0;
+    } else if((deltaSetpoint < threshold && deltaSetpoint > - threshold) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck){
         isFinishedTurn = 1;
+        return 0;
     }
-    printf("%d\r\n", turnCurrentPos);
+    printf("%d\r\n", deltaSetpoint);
+    printf("%d\r\n", turnTimeCheck);
     prevClockTime = currentClockTime;
+    if(deltaSetpoint < threshold && deltaSetpoint > - threshold){
+        return 0;
+    }
+    if(turnP * deltaSetpoint > 60){
+        return 60;
+    } else if(turnP * deltaSetpoint < -60){
+        return -60;
+    }
+    else if(turnP * deltaSetpoint < 55 && turnP * deltaSetpoint > 0){
+        return 55;
+    } else if(turnP * deltaSetpoint > -55){
+        return -55;
+    }
     return turnP * deltaSetpoint;
 }
 
@@ -70,9 +86,9 @@ char MOV_isTurnFinished(void){
 *******/
 
 //Variables to track state of drive
-int driveCurrentPos = 0;
-int acc = 0;
-int vel = 0;
+float driveCurrentPos = 0;
+float acc = 0;
+float vel = 0;
 int driveSetpoint = 0;
 char isFinishedDrive = 0;
 int driveCount = 0;
@@ -89,13 +105,30 @@ void MOV_initFwd(int distance){
 }
 
 int MOV_updateFwd(void){
-    acc = 0; //change to accelerometer value
+    fwdData = I2C_getAccelData();
+    acc = fwdData.y;
+    if(fwdData.y < 0.5 && fwdData.y > -0.5){
+        acc = 0;
+        printf("acc no change");
+//        if (vel > 0) {
+//            vel-=0.1;
+//            if (vel < 0.1) {
+//                vel  = 0;
+//            }
+//        } else if(vel < 0){
+//            vel += 0.1;
+//            if (vel > -0.1) {
+//                vel  = 0;
+//            }
+//        }
+    }
+//    printf("%d", fwdData.y);
     currentClockTime = TIMERS_GetTime();
-    vel += acc * (currentClockTime - prevClockTime);
-    driveCurrentPos += vel * (currentClockTime - prevClockTime);
-    int deltaSetpoint = driveSetpoint - driveCurrentPos;
-
-    if (deltaSetpoint < 10 && deltaSetpoint > - 10 && TIMERS_IsTimerExpired(timerId) && !driveTimeCheck){
+    vel += acc * (currentClockTime - prevClockTime) / 1000.0;
+    driveCurrentPos += vel;
+    float deltaSetpoint = driveSetpoint - driveCurrentPos;
+    printf("%.3f\r\n", vel);
+    if (deltaSetpoint < 10 && deltaSetpoint > - 10 && !driveTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
         driveTimeCheck = 1;
     }
@@ -106,6 +139,7 @@ int MOV_updateFwd(void){
         return 0;
         isFinishedDrive = 1;
     }
+    printf("%.3f\r\n", deltaSetpoint);
     prevClockTime = currentClockTime;
     return driveP * deltaSetpoint;
 }
