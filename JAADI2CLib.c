@@ -70,7 +70,7 @@ void debugPrint(char str[]) {
     }
 }
 
-void debugPrintArray(int array[], int len) {
+void debugPrintArray(char array[], int len) {
 	if (debugMode == true) {
         int i = 0;
         for (i = 0; i<len; i++) {
@@ -286,7 +286,7 @@ int readRegister(unsigned int addr, unsigned char reg) {
     return byte; //return pointerized value
 }
 
-unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, int *buffer, int bytesToRead) {
+unsigned char readRegisterBuffer(unsigned int addr, unsigned char reg, unsigned char *buffer, int bytesToRead) {
 
 	startCondition();
 
@@ -459,7 +459,7 @@ void setupGyro(gyroScale_t scale) {
 
 AccelData I2C_getAccelData() {
 	debugPrint("getAccelData called"); //debug print
-	char buffer[6];
+	unsigned char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
@@ -500,7 +500,7 @@ AccelData I2C_getAccelData() {
 MagData I2C_getMagData() {
 	debugPrint("getMagData called"); //debug print
 	// Read the magnetometer
-	char buffer[6];
+	unsigned char buffer[6];
 	readRegisterBuffer(MAGADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_M, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
@@ -531,7 +531,7 @@ MagData I2C_getMagData() {
 GyroData I2C_getGyroData() {
 	debugPrint("getMagData called"); //debug print
 	// Read gyro
-	char buffer[6];
+	unsigned char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_G, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
