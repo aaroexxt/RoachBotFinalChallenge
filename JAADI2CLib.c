@@ -480,6 +480,7 @@ AccelData I2C_getAccelData() {
 	int16_t realY = (signed short)yhi;
 	int16_t realZ = (signed short)zhi;
 
+	// Unit conversion
 	realX *= _accel_mg_lsb;
 	realX /= 1000;
 	realX *= SENSORS_GRAVITY_STANDARD;
@@ -515,16 +516,22 @@ MagData I2C_getMagData() {
 	xhi <<= 8; xhi |= xlo;
 	yhi <<= 8; yhi |= ylo;
 	zhi <<= 8; zhi |= zlo;
+
+	// Fix two's complement
+	int16_t realX = (signed short)xhi;
+	int16_t realY = (signed short)yhi;
+	int16_t realZ = (signed short)zhi;
 	
-	xhi *= _mag_mgauss_lsb;
-	xhi /= 1000;
-	yhi *= _mag_mgauss_lsb;
-	yhi /= 1000;
-	zhi *= _mag_mgauss_lsb;
-	zhi /= 1000;
+	// Unit conversion
+	realX *= _mag_mgauss_lsb;
+	realX /= 1000;
+	realY *= _mag_mgauss_lsb;
+	realY /= 1000;
+	realZ *= _mag_mgauss_lsb;
+	realZ /= 1000;
 
 	//Create magData struct
-	MagData data = {xhi, yhi, zhi};
+	MagData data = {realX, realY, realZ};
 	return data;
 }
 
@@ -547,9 +554,15 @@ GyroData I2C_getGyroData() {
 	yhi <<= 8; yhi |= ylo;
 	zhi <<= 8; zhi |= zlo;
 
-	xhi *= _gyro_dps_digit;
-	yhi *= _gyro_dps_digit;
-	zhi *= _gyro_dps_digit;
+	// Fix two's complement
+	int16_t realX = (signed short)xhi;
+	int16_t realY = (signed short)yhi;
+	int16_t realZ = (signed short)zhi;
+
+	// Unit conversion
+	realX *= _gyro_dps_digit;
+	realY *= _gyro_dps_digit;
+	realZ *= _gyro_dps_digit;
 
 	//Create gyroData struct
 	GyroData data = {xhi, yhi, zhi};
