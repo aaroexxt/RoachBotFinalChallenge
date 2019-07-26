@@ -83,7 +83,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     break;
                 case DriveForward:
                     printf("DriveForward");
-                    if(event == BOTH_BUMPER_PRESSED){
+                    if (event == BOTH_BUMPER_PRESSED) {
                         current_state = Reverse;
                         MOV_initFwd(-5);
                     }
@@ -91,7 +91,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     break;
                 case Reverse:
                     printf("Reverse");
-                     if (MOV_isFwdFinished()){
+                     if (MOV_isFwdFinished()) {
                         substate_state = TurnNinety;
                         MOV_initTurn(90);
                     }else{

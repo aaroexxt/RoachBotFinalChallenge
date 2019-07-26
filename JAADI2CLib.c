@@ -3,15 +3,17 @@
  * Author: Aaron Becker
  *
  * Created on July 5, 2019, 1:32 PM
- * Big credit to the Arduino TWI and Wire libraries for their reference code :)
  * 
- * Good links:
+ * Good links that I used to write this:
  * https://github.com/mikaelpatel/Arduino-TWI/blob/master/src/Software/TWI.h
- * https://github.com/mdunne/ANIMA/blob/master/code/Small_scale/I2C_Driver.X/I2C_Driver_test.c
+ * https://github.com/bitbank2/Multi_BitBang/blob/40bb8210b8423d5daf0cd90062e5b8e4404a7a96/src/Multi_BitBang.cpp
  * http://www.circuitbasics.com/basics-of-the-i2c-communication-protocol/
+ * https://calcium3000.wordpress.com/2016/08/19/i2c-bit-banging-tutorial-part-i/
+ * https://robot-electronics.co.uk/i2c-tutorial
+ * https://gzalo.com/i2c_en/
  */
 
-
+//Hey anyone who uses this in the future, thanks for tuning in. This took a while to make & debug so I hope that you use it well :)
 
 /*
 I2C COMMUNICATION LETS GET IT
@@ -339,19 +341,19 @@ char I2C_InitSensors() {
 	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG8, 0x05);
    
 	// soft reset & reboot magnetometer
-  	printf("MAGWRITEREG %d\r\n",writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C));
+	writeRegister(MAGADDR, LSM9DS1_REGISTER_CTRL_REG2_M, 0x0C);
 
   	debugPrint("accel and mag soft reset OK");
   	delayMS(10); //wait 10ms
 
   	unsigned char accelId = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG);
-  	printf("ACCEL whoami: %x",accelId);
+  	printf("ACC/GYRO whoami: %x\r\n",accelId);
 	if (accelId != LSM9DS1_XG_ID) { //reeee accelId check failed
 		return false;
 	}
     
 	unsigned char magId = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M);
-	printf("MAG whoami: %x",magId);
+	printf("MAG whoami: %x\r\n",magId);
 	if (magId != LSM9DS1_MAG_ID) {
 		return false;
 	}
@@ -457,52 +459,57 @@ void setupGyro(gyroScale_t scale) {
 
 AccelData I2C_getAccelData() {
 	debugPrint("getAccelData called"); //debug print
-	int buffer[6];
+	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_XL, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
 	uint8_t xlo = buffer[0];//each xhi/xlo is one half of the full 16-bit number
-	int32_t xhi = buffer[1];
+	int16_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
-	int32_t yhi = buffer[3];
+	int16_t yhi = buffer[3];
 	uint8_t zlo = buffer[4];
-	int32_t zhi = buffer[5];
+	int16_t zhi = buffer[5];
 
 	// Shift values to create properly formed integer (low byte first)
 	xhi <<= 8; xhi |= xlo;
 	yhi <<= 8; yhi |= ylo;
 	zhi <<= 8; zhi |= zlo;
 
-	xhi *= _accel_mg_lsb;
-	xhi /= 1000;
-	xhi *= SENSORS_GRAVITY_STANDARD;
+	// Fix two's complement
+	int16_t realX = (signed short)xhi;
+	int16_t realY = (signed short)yhi;
+	int16_t realZ = (signed short)zhi;
 
-	yhi *= _accel_mg_lsb;
-	yhi /= 1000;
-	yhi *= SENSORS_GRAVITY_STANDARD;
+	realX *= _accel_mg_lsb;
+	realX /= 1000;
+	realX *= SENSORS_GRAVITY_STANDARD;
 
-	zhi *= _accel_mg_lsb;
-	zhi /= 1000;
-	zhi *= SENSORS_GRAVITY_STANDARD;
+	realY *= _accel_mg_lsb;
+	realY /= 1000;
+	realY *= SENSORS_GRAVITY_STANDARD;
+
+	realZ *= _accel_mg_lsb;
+	realZ /= 1000;
+	realZ *= SENSORS_GRAVITY_STANDARD;
 	
 	//Create accelData struct
-	AccelData data = {xhi, yhi, zhi};
+	AccelData data = {realX, realY, realZ};
 	return data;
 }
 
 MagData I2C_getMagData() {
 	debugPrint("getMagData called"); //debug print
 	// Read the magnetometer
-	int buffer[6];
+	char buffer[6];
 	readRegisterBuffer(MAGADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_M, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
 	uint8_t xlo = buffer[0];
-	int32_t xhi = buffer[1];
+	int16_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
-	int32_t yhi = buffer[3];
+	int16_t yhi = buffer[3];
 	uint8_t zlo = buffer[4];
-	int32_t zhi = buffer[5];
+	int16_t zhi = buffer[5];
 
 	// Shift values to create properly formed integer (low byte first)
 	xhi <<= 8; xhi |= xlo;
@@ -524,16 +531,16 @@ MagData I2C_getMagData() {
 GyroData I2C_getGyroData() {
 	debugPrint("getMagData called"); //debug print
 	// Read gyro
-	int buffer[6];
+	char buffer[6];
 	readRegisterBuffer(ACCELADDR, 0x80 | LSM9DS1_REGISTER_OUT_X_L_G, buffer, 6);
 
 	debugPrintArray(buffer, 6); //debug print array
 	uint8_t xlo = buffer[0];
-	int32_t xhi = buffer[1];
+	int16_t xhi = buffer[1];
 	uint8_t ylo = buffer[2];
-	int32_t yhi = buffer[3];
+	int16_t yhi = buffer[3];
 	uint8_t zlo = buffer[4];
-	int32_t zhi = buffer[5];
+	int16_t zhi = buffer[5];
 
 	// Shift values to create properly formed integer (low byte first)
 	xhi <<= 8; xhi |= xlo;
