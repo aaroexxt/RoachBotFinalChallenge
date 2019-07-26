@@ -86,28 +86,32 @@ int main(void)
     BOARD_Init();
     Roach_Init();
     TIMERS_Init();
-    MOV_initTurn(90);
     
     //Initialization code here:
     printf("Welcome to COSMOS final project framework, compiled on %s %s\r\n", __TIME__, __DATE__);
     
     printf("\r\n---------\r\nI2CINIT %d\r\n---------\r\n",I2C_Init());
     I2C_setDebugOff();
-
+    MOV_initTurn(180);
 
     //first, setup the framework:
 //    Initialize_RoachStateMachine();
 
     while (1) {
-        currentAccel = I2C_getAccelData();
+//        currentAccel = I2C_getAccelData();
         currentGyro = I2C_getGyroData();
 //        currentMag = I2C_getMagData();
-
+        if(!MOV_isTurnFinished()){
+            MOV_updateTurn();
+            Roach_LeftMtrSpeed(50);
+            Roach_RightMtrSpeed(50);
+        } else {
+            
+        }
         //Print the values for debugging
-        I2C_printAccel(currentAccel);
-//        I2C_printGyro(currentGyro);
+//        I2C_printAccel(currentAccel);
+        I2C_printGyro(currentGyro);
         //I2C_printMag(currentMag);
-        
         delayMS(100);
         //continuous services (event checkers):
         /*Event this_event = CheckForAllEvents();
