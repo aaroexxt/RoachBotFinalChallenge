@@ -472,9 +472,9 @@ AccelData I2C_getAccelData() {
 	zhi <<= 8; zhi |= zlo;
 
 	// Fix two's complement
-	float realX = (float)(signed short)xhi;
-	float realY = (float)(signed short)yhi;
-	float realZ = (float)(signed short)zhi;
+	float realX = (float)xhi;
+	float realY = (float)yhi;
+	float realZ = (float)zhi;
 
 	// Unit conversion
 	realX *= _accel_mg_lsb;
@@ -514,9 +514,9 @@ MagData I2C_getMagData() {
 	zhi <<= 8; zhi |= zlo;
 
 	// Fix two's complement
-	float realX = (float)(signed short)xhi;
-	float realY = (float)(signed short)yhi;
-	float realZ = (float)(signed short)zhi;
+	float realX = (float)xhi;
+	float realY = (float)yhi;
+	float realZ = (float)zhi;
 	
 	// Unit conversion
 	realX *= _mag_mgauss_lsb;
@@ -551,9 +551,9 @@ GyroData I2C_getGyroData() {
 	zhi <<= 8; zhi |= zlo;
 
 	// Fix two's complement
-	float realX = (float)(signed short)xhi;
-	float realY = (float)(signed short)yhi;
-	float realZ = (float)(signed short)zhi;
+	float realX = (float)xhi;
+	float realY = (float)yhi;
+	float realZ = (float)zhi;
 
 	// Unit conversion
 	realX *= _gyro_dps_digit;
