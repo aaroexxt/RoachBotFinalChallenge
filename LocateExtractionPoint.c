@@ -33,6 +33,11 @@ enum {
 static int current_state;
 static int substate_state;
 
+//sets the speed of the roach after one of the front bumpers are pressed 
+const int RoachTurnSpeed = 50;
+
+
+
 AccelData currentAccel;
 GyroData currentGyro;
 MagData currentMag;
@@ -149,3 +154,34 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
     }        
     return event;
 };
+void turn_Until_Both_Bumper_Pressed (){
+
+    if (event == FRONT_LEFT_BUMP_PRESSED) {
+        Roach_LeftMtrSpeed(0);
+        Roach_RightMtrSpeed(50);
+
+    
+        if (event == FRONT_RIGHT_BUMP_PRESSED){
+
+            Reverse;
+        }
+    }
+    
+    else if (event == FRONT_RIGHT_BUMP_PRESSED) {
+
+        Roach_LeftMtrSpeed(50);
+        Roach_RightMtrSpeed(0);
+        
+        if (event == FRONT_LEFT_BUMP_PRESSED) {
+
+            Reverse;
+        }
+
+        
+    } else {
+
+        Reverse;
+    }
+
+
+}
