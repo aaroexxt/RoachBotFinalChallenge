@@ -42,10 +42,10 @@ void MOV_initTurn(int degrees) {
 
 int MOV_updateTurn(void) {
     data = I2C_getGyroData();
-    gyroAngle = (360.0 / 380.0) * data.z; //will change to update gyroAngle
+    gyroAngle = (360.0 / 380.0) * data.z;
     currentClockTime = TIMERS_GetTime();
     turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime) / 1000;
-    int deltaSetpoint = turnSetpoint - turnCurrentPos;
+    float deltaSetpoint = turnSetpoint - turnCurrentPos;
 
     if (deltaSetpoint < threshold && deltaSetpoint > - threshold && !turnTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
@@ -109,24 +109,12 @@ int MOV_updateFwd(void){
     acc = fwdData.y;
     if(fwdData.y < 0.5 && fwdData.y > -0.5){
         acc = 0;
-        printf("acc no change");
-//        if (vel > 0) {
-//            vel-=0.1;
-//            if (vel < 0.1) {
-//                vel  = 0;
-//            }
-//        } else if(vel < 0){
-//            vel += 0.1;
-//            if (vel > -0.1) {
-//                vel  = 0;
-//            }
-//        }
     }
-//    printf("%d", fwdData.y);
     currentClockTime = TIMERS_GetTime();
     vel += acc * (currentClockTime - prevClockTime) / 1000.0;
-    driveCurrentPos += vel;
+    driveCurrentPos += vel * (currentClockTime - prevClockTime) / 1000.0;
     float deltaSetpoint = driveSetpoint - driveCurrentPos;
+    printf("%.3f\r\n", deltaSetpoint);
     printf("%.3f\r\n", vel);
     if (deltaSetpoint < 10 && deltaSetpoint > - 10 && !driveTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
@@ -139,7 +127,6 @@ int MOV_updateFwd(void){
         return 0;
         isFinishedDrive = 1;
     }
-    printf("%.3f\r\n", deltaSetpoint);
     prevClockTime = currentClockTime;
     return driveP * deltaSetpoint;
 }
