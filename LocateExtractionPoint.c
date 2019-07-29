@@ -23,6 +23,7 @@ enum {
 
 //Enum for Aligning Substates
 enum {
+    Reverse0,
     TurnZero,
     DriveForward,
     Reverse,
@@ -56,7 +57,7 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
     I2C_setDebugOn(); //set debug mode to be on*/
     
    current_state = Aligning;
-   substate_state = TurnZero;
+   substate_state = Reverse0;
 };
 
 /* 
@@ -68,6 +69,21 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
         case Aligning:
         printf("Aligning");
             switch (substate_state) {
+                // Roach_LeftMtrSpeed(-100);
+                // Roach_RightMtrSpeed(-100);
+                // substate_state = Reverse;
+                case Reverse0:
+                    printf("First reverse");
+                    if (MOV_isFwdFinished()) {
+                        substate_state = TurnNinety;
+                        MOV_initTurn(90);
+                    }else{
+                        int newMotorSpeed =  MOV_updateFwd();
+                        Roach_LeftMtrSpeed(newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
+                    }
+                    break;
+
                 case TurnZero:
                     printf("TurnZero");
                     if (MOV_isTurnFinished()) {
