@@ -9,7 +9,7 @@
 #include "timers.h"
 #include "JAADI2CLib.h"
 #define timerId 5
-#define checkTime 1500
+#define checkTime 500
 
 /*******
 * TURN CODE
@@ -19,10 +19,10 @@
 #define turnP 1.3
 #define driveP 0.2
 #define minPower 55
-#define maxPower 65
+#define maxPower 56
 //Error thresholds
-#define turnThreshold 5
-#define driveThreshold 10
+#define turnThreshold 5.0
+#define driveThreshold 3
 
 //Variables to track state of turn
 float turnCurrentPos = 0;
@@ -40,7 +40,7 @@ AccelData fwdData;
 void MOV_initTurn(int degrees) {
     turnCount = 0;
     turnCurrentPos = 0;
-    turnSetpoint = degrees;
+    turnSetpoint = (float) degrees;
     isFinishedTurn = 0;
     turnTimeCheck = 0;
     prevClockTime = TIMERS_GetTime();
@@ -48,9 +48,9 @@ void MOV_initTurn(int degrees) {
 
 int MOV_updateTurn(void) {
     data = I2C_getGyroData();
-    gyroAngle = (360.0 / 380.0) * data.z;
+    gyroAngle = data.z;
     currentClockTime = TIMERS_GetTime();
-    turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime) / 1000;
+    turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime) / 1000.0;
     float deltaSetpoint = turnSetpoint - turnCurrentPos;
 
     if (deltaSetpoint < turnThreshold && deltaSetpoint > - turnThreshold && !turnTimeCheck){
@@ -64,14 +64,14 @@ int MOV_updateTurn(void) {
         isFinishedTurn = 1;
         return 0;
     }
-    printf("%d\r\n", deltaSetpoint);
-    printf("%d\r\n", turnTimeCheck);
+    printf("%.3f\r\n", deltaSetpoint);
+//    printf("%d\r\n", turnTimeCheck);
     prevClockTime = currentClockTime;
     if(deltaSetpoint < turnThreshold && deltaSetpoint > -turnThreshold){
         return 0;
     }
 
-    char newPower = turnP * deltaSetpoint;
+    int newPower = (int) (turnP * deltaSetpoint);
     if(newPower > maxPower){
         return maxPower;
     } else if(newPower < -maxPower){
@@ -115,15 +115,25 @@ void MOV_initFwd(int distance){
 int MOV_updateFwd(void){
     fwdData = I2C_getAccelData();
     acc = fwdData.y;
-    if(fwdData.y < 0.4 && fwdData.y > -0.4) {
+    if(fwdData.y < 0.5 && fwdData.y > -0.5) {
         acc = 0;
+    } else {
+//        printf("%.3f\r\n", fwdData.y);
     }
     currentClockTime = TIMERS_GetTime();
-    vel += acc * (currentClockTime - prevClockTime) / 1000.0;
-    driveCurrentPos += vel * (currentClockTime - prevClockTime) / 1000.0;
+    driveCurrentPos += acc * (currentClockTime - prevClockTime) * (currentClockTime - prevClockTime) / 100.0;
+//    if(vel < -1 || vel > 1){
+//        driveCurrentPos += vel * (currentClockTime - prevClockTime) / 1000.0;   
+//    }
     float deltaSetpoint = driveSetpoint - driveCurrentPos;
+    if(vel > 0.1){
+        vel -= 0.1;
+    } else if(vel < - 0.1){
+        vel += 0.1;
+    }
+    
     printf("dSet %.3f\r\n", deltaSetpoint);
-    printf("vel %.3f\r\n", vel);
+//    printf("vel %.3f\r\n", vel);
     if (deltaSetpoint < driveThreshold && deltaSetpoint > -driveThreshold && !driveTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
         driveTimeCheck = 1;
@@ -137,7 +147,9 @@ int MOV_updateFwd(void){
     }
 
     prevClockTime = currentClockTime;
-
+    if(deltaSetpoint < driveThreshold && deltaSetpoint > -driveThreshold){
+        return 0;
+    }
     char newPower = driveP * deltaSetpoint;
     if(newPower > maxPower){
         return maxPower;

@@ -90,11 +90,6 @@
 #define	LSM9DS1_MAGDATARATE_50HZ              (0b100 << 2)
 #define	LSM9DS1_MAGDATARATE_100HZ             (0b101 << 2)
 
-
-#define	LSM9DS1_GYROSCALE_245DPS              (0b00 << 3)  // +/- 245 degrees per second rotation
-#define	LSM9DS1_GYROSCALE_500DPS              (0b01 << 3)  // +/- 500 degrees per second rotation
-#define	LSM9DS1_GYROSCALE_2000DPS             (0b11 << 3)   // +/- 2000 degrees per second rotation
-
 //Sensor range enums
 typedef enum
 {
@@ -118,6 +113,9 @@ typedef enum {
   LSM9DS1_GYROSCALE_2000DPS            = (0b11 << 3)   // +/- 2000 degrees per second rotation
 } gyroScale_t;
 
+#define	LSM9DS1_GYROSCALE_245DPS              (0b00 << 3)  // +/- 245 degrees per second rotation
+#define	LSM9DS1_GYROSCALE_500DPS              (0b01 << 3)  // +/- 500 degrees per second rotation
+#define	LSM9DS1_GYROSCALE_2000DPS             (0b11 << 3)   // +/- 2000 degrees per second rotation
 
 //Structs for data transfer
 
