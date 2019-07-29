@@ -27,14 +27,17 @@ enum {
     DriveForward,
     Reverse,
     TurnNinety,
-    DriveToCorner
+    DriveToCorner,
+    TurnToWall1,
+    TurnToWall2
 };
+
 
 static int current_state;
 static int substate_state;
 
 //sets the speed of the roach after one of the front bumpers are pressed 
-const int RoachTurnSpeed = 50;
+const int RoachTurnSpeed = 100;
 
 
 
@@ -80,11 +83,36 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                 case DriveForward:
                     printf("DriveForward");
                     if (event == BOTH_BUMPER_PRESSED) {
-                        current_state = Reverse;
-                        MOV_initFwd(-5);
+                        current_state = TurnToWall1;
+                        
+
                     }
+
                     
                     break;
+
+                case TurnToWall1:
+                    printf("TurnToWall1");
+                    if (event == FRONT_LEFT_BUMP_PRESSED)
+                    {
+                        Roach_LeftMtrSpeed(0);
+                        Roach_RightMtrSpeed(100);
+                    }
+                    else if (event == FRONT_RIGHT_BUMP_PRESSED)
+                    {
+                        Roach_LeftMtrSpeed(100);
+                        Roach_RightMtrSpeed(0);
+                    }
+                    
+                    if (Roach_ReadFrontLeftBumper() && Roach_ReadFrontRightBumper())
+                    {
+                        MOV_initFwd(-5);
+
+                        current_state = Reverse;
+                    }
+
+                    break;
+
                 case Reverse:
                     printf("Reverse");
                      if (MOV_isFwdFinished()) {
@@ -110,12 +138,38 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     break;
                 case DriveToCorner:
                     printf("DriveToCorner");
-                    if(event == BOTH_BUMPER_PRESSED){
+
+                    if(Roach_ReadFrontLeftBumper() && Roach_ReadFrontRightBumper()) {
+
+                        substate_state = TurnToWall2;
+                    }
+                    break;
+
+                case TurnToWall2:
+                    printf("TurnToWall2");
+                    if (event == FRONT_LEFT_BUMP_PRESSED)
+                    {
+                        Roach_LeftMtrSpeed(0);
+                        Roach_RightMtrSpeed(100);
+                    }
+                    else if (event == FRONT_RIGHT_BUMP_PRESSED)
+                    {
+                        Roach_LeftMtrSpeed(100);
+                        Roach_RightMtrSpeed(0);
+                    }
+                    
+                    if (Roach_ReadFrontLeftBumper() && Roach_ReadFrontRightBumper())
+                    {
                         current_state = Orienting;
                         MOV_initTurn(135);
                     }
+
+                    break;
             }
+
             break;
+
+
         case Orienting:
             printf("Orienting");
             if (MOV_isTurnFinished()) {
@@ -145,34 +199,6 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
     }        
     return event;
 };
-void turn_Until_Both_Bumper_Pressed (){
-
-    if (event == FRONT_LEFT_BUMP_PRESSED) {
-        Roach_LeftMtrSpeed(0);
-        Roach_RightMtrSpeed(50);
-
-    
-        if (event == FRONT_RIGHT_BUMP_PRESSED){
-
-            Reverse;
-        }
-    }
-    
-    else if (event == FRONT_RIGHT_BUMP_PRESSED) {
-
-        Roach_LeftMtrSpeed(50);
-        Roach_RightMtrSpeed(0);
-        
-        if (event == FRONT_LEFT_BUMP_PRESSED) {
-
-            Reverse;
-        }
-
-        
-    } else {
-
-        Reverse;
-    }
 
 
-}
+
