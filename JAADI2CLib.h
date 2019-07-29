@@ -10,10 +10,10 @@
 
 #ifndef true
 #define true 1
-#define false -1
+#define false 0
 #endif
 
-
+//Address and internal address of sensors
 #define ACCELADDR          (0x6B)
 #define MAGADDR                (0x1E)
 #define LSM9DS1_XG_ID                      (0b01101000)
@@ -37,7 +37,7 @@
 #define LSM9DS1_GYRO_DPS_DIGIT_2000DPS     (0.07000F)
 
 #define SENSORS_GRAVITY_STANDARD             (9.80665F)              /**< Earth's gravity in m/s^2 */
-
+//Various register IDs for use in driver
 #define	LSM9DS1_REGISTER_WHO_AM_I_XG          0x0F
 #define	LSM9DS1_REGISTER_CTRL_REG1_G          0x10
 #define	LSM9DS1_REGISTER_CTRL_REG2_G          0x11
@@ -83,8 +83,19 @@
 #define	LSM9DS1_REGISTER_CFG_M               0x30
 #define	LSM9DS1_REGISTER_INT_SRC_M           0x31
 
+#define	LSM9DS1_MAGDATARATE_3_125HZ           (0b000 << 2)
+#define	LSM9DS1_MAGDATARATE_6_25HZ            (0b001 << 2)
+#define	LSM9DS1_MAGDATARATE_12_5HZ            (0b010 << 2)
+#define	LSM9DS1_MAGDATARATE_25HZ              (0b011 << 2)
+#define	LSM9DS1_MAGDATARATE_50HZ              (0b100 << 2)
+#define	LSM9DS1_MAGDATARATE_100HZ             (0b101 << 2)
 
 
+#define	LSM9DS1_GYROSCALE_245DPS              (0b00 << 3)  // +/- 245 degrees per second rotation
+#define	LSM9DS1_GYROSCALE_500DPS              (0b01 << 3)  // +/- 500 degrees per second rotation
+#define	LSM9DS1_GYROSCALE_2000DPS             (0b11 << 3)   // +/- 2000 degrees per second rotation
+
+//Sensor range enums
 typedef enum
 {
 	LSM9DS1_ACCELRANGE_2G                = (0b00 << 3),
@@ -106,19 +117,6 @@ typedef enum {
   LSM9DS1_GYROSCALE_500DPS             = (0b01 << 3),  // +/- 500 degrees per second rotation
   LSM9DS1_GYROSCALE_2000DPS            = (0b11 << 3)   // +/- 2000 degrees per second rotation
 } gyroScale_t;
-
-
-#define	LSM9DS1_MAGDATARATE_3_125HZ           (0b000 << 2)
-#define	LSM9DS1_MAGDATARATE_6_25HZ            (0b001 << 2)
-#define	LSM9DS1_MAGDATARATE_12_5HZ            (0b010 << 2)
-#define	LSM9DS1_MAGDATARATE_25HZ              (0b011 << 2)
-#define	LSM9DS1_MAGDATARATE_50HZ              (0b100 << 2)
-#define	LSM9DS1_MAGDATARATE_100HZ             (0b101 << 2)
-
-
-#define	LSM9DS1_GYROSCALE_245DPS              (0b00 << 3)  // +/- 245 degrees per second rotation
-#define	LSM9DS1_GYROSCALE_500DPS              (0b01 << 3)  // +/- 500 degrees per second rotation
-#define	LSM9DS1_GYROSCALE_2000DPS             (0b11 << 3)   // +/- 2000 degrees per second rotation
 
 
 //Structs for data transfer

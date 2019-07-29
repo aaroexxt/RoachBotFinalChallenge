@@ -15,19 +15,6 @@
 
 //Hey anyone who uses this in the future, thanks for tuning in. This took a while to make & debug so I hope that you use it well :)
 
-/*
-I2C COMMUNICATION LETS GET IT
-
-START:
-SDA goes high -> low before SCL high -> low
-STOP:
-SDA goes low -> high after SCL low -> high
-ADDRESS:
-7 or 10 bit sequence (will be 7) that identifies the slave
-
-REQUIRES PULL UP RESISTORS
-*/
-
 //require the i2c lib
 #include "JAADI2CLib.h"
 #include "JAADIOLib.h"
@@ -38,10 +25,7 @@ const int T1 = 4;
 /** Basic clock delay time: 4.7 us (100 kHz) */
 const int T2 = 5;
 
-/** Maximum number of clock stretching retries: 100 us */
-const int CLOCK_STRETCHING_RETRY_MAX = 25;
-
-//float to record various scaling constants
+//float to record various scaling constants (setup later)
 float _accel_mg_lsb;
 float _mag_mgauss_lsb;
 float _gyro_dps_digit;
@@ -75,6 +59,7 @@ void debugPrintArray(char array[], int len) {
     }
 }
 
+//Debug functions - enable/disable
 void I2C_setDebugOn(void) {
 	debugMode = true;
 }
@@ -83,6 +68,7 @@ void I2C_setDebugOff(void) {
 	debugMode = false;
 }
 
+//Debug print functions - will print data reading
 void I2C_printAccel(AccelData data) {
 	printf("(AccReading) x: %.3f, y: %.3f, z: %.3f \r\n", data.x, data.y, data.z);
 }
@@ -98,31 +84,31 @@ void I2C_printMag(MagData data) {
 LOWEST LEVEL FUNCTIONS
 ******/
 
-void SDAHIGH(void) {
+void SDAHIGH(void) { //Allow SDA to be pulled high by pullup resistor by setting it as input
 	IO_setPortDirection(SDA, INPUT);
-} //Pullup resistor should take care of this
-void SCLHIGH(void) {
+}
+void SCLHIGH(void) { //Allow SCL to be pulled high by pullup resistor by setting it as input
 	IO_setPortDirection(SCL, INPUT);
-} //same with this
+}
 
-void SDALOW(void) {
+void SDALOW(void) { //Make SDA low by setting it as output and then setting it to low
 	IO_setPortDirection(SDA, OUTPUT);
 	IO_setPort(SDA, LOW);
 }
 
-void SCLLOW(void) {
+void SCLLOW(void) { //Make SCL low by setting it as output and then setting it to low
 	IO_setPortDirection(SCL, OUTPUT);
 	IO_setPort(SCL, LOW);
 }
 
 void delayUS(unsigned long delay_us) {
-    return;
-   unsigned long DelayStartTime;
-   
-   DelayStartTime = ReadCoreTimer(); //read core timer into delay start time
-   while((ReadCoreTimer() - DelayStartTime) < (delay_us * CORE_TIMER_MICROSECONDS));
+    return; //no delay required
+	unsigned long DelayStartTime;
 
-   return;
+	DelayStartTime = ReadCoreTimer(); //read core timer into delay start time
+	while((ReadCoreTimer() - DelayStartTime) < (delay_us * CORE_TIMER_MICROSECONDS));
+
+	return;
 }
 
 void delayMS(unsigned long delay_ms) {
@@ -173,9 +159,7 @@ unsigned char rxByte(char ack) {
 		SCLHIGH(); //clock high
 		byte <<= 1;
 
-		//debugPrint("preClkStretch rx");
 		while (IO_readPort(SCL) == 0) {};    // wait for any SCL clock stretching
-		//debugPrint("postClkStretch rx");
 
 		if (IO_readPort(SDA) == HIGH) { //check for data byte
 			byte |= 1;
@@ -183,7 +167,6 @@ unsigned char rxByte(char ack) {
 		SCLLOW();
 	} 
 
-	//THIS COULD BE FLIPPED, NOT SURE
 	if (ack) {
 		SDALOW();
 	} else {
@@ -331,7 +314,7 @@ char I2C_Init() {
 	}
 }
 
-char I2C_InitSensors() {
+char I2C_InitSensors() { //do full init sequence
 	debugPrint("I2C_INITSENSORS BEGIN");
 	// soft reset & reboot accel/gyro
 	writeRegister(ACCELADDR, LSM9DS1_REGISTER_CTRL_REG8, 0x05);
@@ -342,12 +325,14 @@ char I2C_InitSensors() {
   	debugPrint("accel and mag soft reset OK");
   	delayMS(10); //wait 10ms
 
+  	//Check if the accelerometer is present - check internal ID
   	unsigned char accelId = readRegister(ACCELADDR, LSM9DS1_REGISTER_WHO_AM_I_XG);
   	printf("ACC/GYRO whoami: %x\r\n",accelId);
 	if (accelId != LSM9DS1_XG_ID) { //reeee accelId check failed
 		return false;
 	}
     
+   	//Check if the magnetometer is present - check internal ID
 	unsigned char magId = readRegister(MAGADDR, LSM9DS1_REGISTER_WHO_AM_I_M);
 	printf("MAG whoami: %x\r\n",magId);
 	if (magId != LSM9DS1_MAG_ID) {
@@ -376,6 +361,10 @@ char I2C_InitSensors() {
 
 	return true;
 }
+
+/*********
+* SETUP FUNCTIONS
+*********/
 
 void setupAccel(accelRange_t range) {
 	debugPrint("setupAccel called");
@@ -452,6 +441,10 @@ void setupGyro(gyroScale_t scale) {
 	debugPrint("setupGyro done");
 	return;
 }
+
+/*********
+* DATA CONVERSION
+*********/
 
 AccelData I2C_getAccelData() {
 	debugPrint("getAccelData called"); //debug print
