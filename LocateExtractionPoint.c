@@ -82,7 +82,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     break;
                 case DriveForward:
                     printf("DriveForward");
-                    if (event == BOTH_BUMPER_PRESSED) {
+                    if (Roach_ReadFrontLeftBumper() || Roach_ReadFrontRightBumper()) {
                         current_state = TurnToWall1;
                         
 
