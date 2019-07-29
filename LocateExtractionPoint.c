@@ -58,6 +58,7 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
     
    current_state = Aligning;
    substate_state = Reverse0;
+   MOV_initFwd(-5);
 };
 
 /* 
@@ -75,8 +76,8 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                 case Reverse0:
                     printf("First reverse");
                     if (MOV_isFwdFinished()) {
-                        substate_state = TurnNinety;
-                        MOV_initTurn(90);
+                        substate_state = TurnZero;
+                        MOV_initTurn(30);
                     }else{
                         int newMotorSpeed =  MOV_updateFwd();
                         Roach_LeftMtrSpeed(newMotorSpeed);
@@ -100,7 +101,6 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     printf("DriveForward");
                     if (Roach_ReadFrontLeftBumper() || Roach_ReadFrontRightBumper()) {
                         current_state = TurnToWall1;
-                        
 
                     }
 
