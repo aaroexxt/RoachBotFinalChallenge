@@ -8,15 +8,21 @@
 #include "JAADMOVLib.h"
 #include "timers.h"
 #include "JAADI2CLib.h"
-#define turnP 1.3
-#define driveP 0.2
 #define timerId 5
 #define checkTime 1500
-#define threshold 5
 
 /*******
 * TURN CODE
 *******/
+
+//Control variables
+#define turnP 1.3
+#define driveP 0.2
+#define minPower 55
+#define maxPower 65
+//Error thresholds
+#define turnThreshold 5
+#define driveThreshold 10
 
 //Variables to track state of turn
 float turnCurrentPos = 0;
@@ -47,34 +53,36 @@ int MOV_updateTurn(void) {
     turnCurrentPos += gyroAngle * (currentClockTime - prevClockTime) / 1000;
     float deltaSetpoint = turnSetpoint - turnCurrentPos;
 
-    if (deltaSetpoint < threshold && deltaSetpoint > - threshold && !turnTimeCheck){
+    if (deltaSetpoint < turnThreshold && deltaSetpoint > - turnThreshold && !turnTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
         turnTimeCheck = 1;
     }
     
-    if ((deltaSetpoint > threshold || deltaSetpoint < - threshold) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck) {
+    if ((deltaSetpoint > turnThreshold || deltaSetpoint < - turnThreshold) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck) {
         turnTimeCheck = 0;
-    } else if((deltaSetpoint < threshold && deltaSetpoint > - threshold) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck){
+    } else if((deltaSetpoint < turnThreshold && deltaSetpoint > - turnThreshold) && TIMERS_IsTimerExpired(timerId) && turnTimeCheck){
         isFinishedTurn = 1;
         return 0;
     }
     printf("%d\r\n", deltaSetpoint);
     printf("%d\r\n", turnTimeCheck);
     prevClockTime = currentClockTime;
-    if(deltaSetpoint < threshold && deltaSetpoint > - threshold){
+    if(deltaSetpoint < turnThreshold && deltaSetpoint > -turnThreshold){
         return 0;
     }
-    if(turnP * deltaSetpoint > 60){
-        return 60;
-    } else if(turnP * deltaSetpoint < -60){
-        return -60;
+
+    char newPower = turnP * deltaSetpoint;
+    if(newPower > maxPower){
+        return maxPower;
+    } else if(newPower < -maxPower){
+        return -maxPower;
     }
-    else if(turnP * deltaSetpoint < 55 && turnP * deltaSetpoint > 0){
-        return 55;
-    } else if(turnP * deltaSetpoint > -55){
-        return -55;
+    else if(newPower < minPower && newPower > 0){
+        return minPower;
+    } else if(newPower > -minPower){
+        return -minPower;
     }
-    return turnP * deltaSetpoint;
+    return newPower;
 }
 
 char MOV_isTurnFinished(void){
@@ -107,28 +115,41 @@ void MOV_initFwd(int distance){
 int MOV_updateFwd(void){
     fwdData = I2C_getAccelData();
     acc = fwdData.y;
-    if(fwdData.y < 0.5 && fwdData.y > -0.5){
+    if(fwdData.y < 0.4 && fwdData.y > -0.4) {
         acc = 0;
     }
     currentClockTime = TIMERS_GetTime();
     vel += acc * (currentClockTime - prevClockTime) / 1000.0;
     driveCurrentPos += vel * (currentClockTime - prevClockTime) / 1000.0;
     float deltaSetpoint = driveSetpoint - driveCurrentPos;
-    printf("%.3f\r\n", deltaSetpoint);
-    printf("%.3f\r\n", vel);
-    if (deltaSetpoint < 10 && deltaSetpoint > - 10 && !driveTimeCheck){
+    printf("dSet %.3f\r\n", deltaSetpoint);
+    printf("vel %.3f\r\n", vel);
+    if (deltaSetpoint < driveThreshold && deltaSetpoint > -driveThreshold && !driveTimeCheck){
         TIMERS_InitTimer(timerId, checkTime);
         driveTimeCheck = 1;
     }
     
-    if ((deltaSetpoint > 10 || deltaSetpoint < - 10) && TIMERS_IsTimerExpired(timerId) && driveTimeCheck) {
+    if ((deltaSetpoint > driveThreshold || deltaSetpoint < -driveThreshold) && TIMERS_IsTimerExpired(timerId) && driveTimeCheck) {
         driveTimeCheck = 0;
-    } else if((deltaSetpoint < 10 && deltaSetpoint > - 10) && TIMERS_IsTimerExpired(timerId) && driveTimeCheck){
-        return 0;
+    } else if((deltaSetpoint < driveThreshold && deltaSetpoint > -driveThreshold) && TIMERS_IsTimerExpired(timerId) && driveTimeCheck){
         isFinishedDrive = 1;
+        return 0;
     }
+
     prevClockTime = currentClockTime;
-    return driveP * deltaSetpoint;
+
+    char newPower = driveP * deltaSetpoint;
+    if(newPower > maxPower){
+        return maxPower;
+    } else if(newPower < -maxPower){
+        return -maxPower;
+    }
+    else if(newPower < minPower && newPower > 0){
+        return minPower;
+    } else if(newPower > -minPower){
+        return -minPower;
+    }
+    return newPower;
 }
 
 char MOV_isFwdFinished(){

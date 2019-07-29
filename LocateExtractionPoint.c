@@ -52,23 +52,14 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
     /*I2C_Init(); //init I2C library
     I2C_setDebugOn(); //set debug mode to be on*/
     
-//    current_state = Aligning;
-    //^ removed because I don't want switch-case to run
+   current_state = Aligning;
+   substate_state = TurnZero;
 };
 
 /* 
  * @briefThis function feeds newly detected events to the roach state machine.
  * @param event:  The most recently detected event*/
 Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
-    //Update the current gyro values
-    currentAccel = I2C_getAccelData();
-    currentGyro = I2C_getGyroData();
-    currentMag = I2C_getMagData();
-    
-    //Print the values for debugging
-    I2C_printAccel(currentAccel);
-    I2C_printGyro(currentGyro);
-    I2C_printMag(currentMag);
     
     switch (current_state) {
         case Aligning:
