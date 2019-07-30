@@ -94,23 +94,23 @@ int main(void)
     printf("\r\n---------\r\nI2CINIT %d\r\n---------\r\n",I2C_Init());
     I2C_setDebugOff();
     delayMS(2000);
-    MOV_initTurn(180);
+//    MOV_initTurn(180);
 
     //first, setup the framework:
-//    Initialize_RoachStateMachine();
+    Initialize_LocateExtractionPoint_StateMachine();
 
     while (1) {
 //        currentMag = I2C_getMagData();
 //        currentGyro = I2C_getGyroData();
-        if(!MOV_isTurnFinished()){
-            mov = MOV_updateTurn();
-            Roach_LeftMtrSpeed(-mov);
-            Roach_RightMtrSpeed(-mov);
-        } else {
-            printf("DONE");
-            Roach_LeftMtrSpeed(0);
-            Roach_RightMtrSpeed(0);
-        }
+//        if(!MOV_isTurnFinished()){
+//            mov = MOV_updateTurn();
+//            Roach_LeftMtrSpeed(-mov);
+//            Roach_RightMtrSpeed(-mov);
+//        } else {
+//            printf("DONE");
+//            Roach_LeftMtrSpeed(0);
+//            Roach_RightMtrSpeed(0);
+//        }
         //Print the values for debugging
 //        I2C_printAccel(currentAccel);
 //        I2C_printGyro(currentGyro);
@@ -119,20 +119,20 @@ int main(void)
         //I2C_printMag(currentMag);
 //        delayMS(100);
         //continuous services (event checkers):
-        /*Event this_event = CheckForAllEvents();
-
-        if (this_event != NO_EVENT) {
-            //seed rand (leverage unpredictable event timing):
-            srand(TIMERS_GetTime() ^ rand());
-            
-            //handle event:
-            PrintEvent(this_event);
-            //run service:
-            Run_Roach_TopLevel_StateMachine(this_event);
-            //clear event:
-            this_event = NO_EVENT;
-
-        }*/
+        Event this_event = CheckForAllEvents();
+        Run_Roach_LocateExtractionPoint_StateMachine(this_event);
+//        if (this_event != NO_EVENT) {
+//            //seed rand (leverage unpredictable event timing):
+//            srand(TIMERS_GetTime() ^ rand());
+//            
+//            //handle event:
+//            PrintEvent(this_event);
+//            //run service:
+//            
+//            //clear event:
+//            this_event = NO_EVENT;
+//
+//        }
 
         
 

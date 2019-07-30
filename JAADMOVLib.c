@@ -18,8 +18,8 @@
 //Control variables
 #define turnP 1.3
 #define driveP 0.2
-#define minPower 55
-#define maxPower 56
+#define minPower 60
+#define maxPower 65
 //Error thresholds
 #define turnThreshold 5.0
 #define driveThreshold 3
@@ -44,6 +44,7 @@ void MOV_initTurn(int degrees) {
     isFinishedTurn = 0;
     turnTimeCheck = 0;
     prevClockTime = TIMERS_GetTime();
+    
 }
 
 int MOV_updateTurn(void) {
@@ -110,6 +111,11 @@ void MOV_initFwd(int distance){
     isFinishedDrive = 0;
     driveTimeCheck = 0;
     prevClockTime = TIMERS_GetTime();
+        int i = 0;
+
+    for(i = 0; i < 32; i++){
+        data = I2C_getGyroData();
+    }
 }
 
 int MOV_updateFwd(void){

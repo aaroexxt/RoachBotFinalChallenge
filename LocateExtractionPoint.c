@@ -35,7 +35,7 @@ enum {
 
 static int current_state;
 static int substate_state;
-
+char leftPressedFirst = 0;
 //sets the speed of the roach after one of the front bumpers are pressed 
 const int RoachTurnSpeed = 100;
 
@@ -56,8 +56,11 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
     I2C_setDebugOn(); //set debug mode to be on*/
     
    current_state = Aligning;
-   substate_state = TurnZero;
-   MOV_initTurn(-45);
+   substate_state = DriveForward;
+   Roach_LeftMtrSpeed(70);
+   Roach_RightMtrSpeed(-70);
+//   MOV_initTurn(-45);
+//     MOV_initFwd(-20);
 };
 
 /* 
@@ -77,19 +80,26 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     printf("TurnZero");
                     if (MOV_isTurnFinished()) {
                        substate_state = DriveForward;
-                       Roach_LeftMtrSpeed(100);
-                       Roach_RightMtrSpeed(100);
+                       Roach_LeftMtrSpeed(70);
+                       Roach_RightMtrSpeed(-70);
                     } else{
                         int newMotorSpeed = MOV_updateTurn();
-                        Roach_LeftMtrSpeed(newMotorSpeed);
-                        Roach_RightMtrSpeed(newMotorSpeed);
+                        Roach_LeftMtrSpeed(-newMotorSpeed);
+                        Roach_RightMtrSpeed(-newMotorSpeed);
                     }
                     break;
                 case DriveForward:
-                    printf("DriveForward");
-                    if (Roach_ReadFrontLeftBumper() || Roach_ReadFrontRightBumper()) {
-                        current_state = TurnToWall1;
-
+//                    printf("DriveForward");
+                    if (event == FRONT_LEFT_BUMP_PRESSED) {
+                        Roach_LeftMtrSpeed(0);
+                        Roach_RightMtrSpeed(-100);
+                        leftPressedFirst = 1;
+                        substate_state = TurnToWall1;
+                    } else if(event == FRONT_RIGHT_BUMP_PRESSED){
+                        Roach_LeftMtrSpeed(100);
+                        Roach_RightMtrSpeed(0);
+                        leftPressedFirst = 0;
+                        substate_state = TurnToWall1;
                     }
 
                     
@@ -97,23 +107,21 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
 
                 case TurnToWall1:
                     printf("TurnToWall1");
-                    if (event == FRONT_LEFT_BUMP_PRESSED)
-                    {
-                        Roach_LeftMtrSpeed(0);
-                        Roach_RightMtrSpeed(100);
+                    if (!leftPressedFirst && event == FRONT_LEFT_BUMP_PRESSED){
+//                        printf("HERE");
+//                        MOV_initFwd(-20);
+//                        substate_state = Reverse;
+                        substate_state = TurnNinety;
+                        MOV_initTurn(90);
                     }
-                    else if (event == FRONT_RIGHT_BUMP_PRESSED)
+                    else if (leftPressedFirst && event == FRONT_RIGHT_BUMP_PRESSED)
                     {
-                        Roach_LeftMtrSpeed(100);
-                        Roach_RightMtrSpeed(0);
-                    }
-                    
-                    if (Roach_ReadFrontLeftBumper() && Roach_ReadFrontRightBumper())
-                    {
-                        MOV_initFwd(-5);
-
-                        current_state = Reverse;
-                    }
+//                        printf("HERE");
+//                        MOV_initFwd(-20);
+//                        substate_state = Reverse;
+                    substate_state = TurnNinety;
+                        MOV_initTurn(90);
+                    }                   
 
                     break;
 
@@ -125,48 +133,54 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     }else{
                         int newMotorSpeed =  MOV_updateFwd();
                         Roach_LeftMtrSpeed(newMotorSpeed);
-                        Roach_RightMtrSpeed(newMotorSpeed);
+                        Roach_RightMtrSpeed(-newMotorSpeed);
                     }
                     break;
                 case TurnNinety:
                     printf("TurnNinety");
                     if (MOV_isTurnFinished()) {
                         substate_state = DriveToCorner;
-                        Roach_LeftMtrSpeed(100);
-                        Roach_RightMtrSpeed(100);
+                        Roach_LeftMtrSpeed(70);
+                        Roach_RightMtrSpeed(-70);
                     }else{
                         int newMotorSpeed = MOV_updateTurn();
-                        Roach_LeftMtrSpeed(newMotorSpeed);
-                        Roach_RightMtrSpeed(newMotorSpeed);
+                        Roach_LeftMtrSpeed(-newMotorSpeed);
+                        Roach_RightMtrSpeed(-newMotorSpeed);
                     }
                     break;
                 case DriveToCorner:
                     printf("DriveToCorner");
 
-                    if(Roach_ReadFrontLeftBumper() && Roach_ReadFrontRightBumper()) {
-
+                    if (event == FRONT_LEFT_BUMP_PRESSED) {
+                        Roach_LeftMtrSpeed(0);
+                        Roach_RightMtrSpeed(-100);
+                        leftPressedFirst = 1;
+                        substate_state = TurnToWall2;
+                    } else if(event == FRONT_RIGHT_BUMP_PRESSED){
+                        Roach_LeftMtrSpeed(100);
+                        Roach_RightMtrSpeed(0);
+                        leftPressedFirst = 0;
                         substate_state = TurnToWall2;
                     }
                     break;
 
                 case TurnToWall2:
                     printf("TurnToWall2");
-                    if (event == FRONT_LEFT_BUMP_PRESSED)
-                    {
-                        Roach_LeftMtrSpeed(0);
-                        Roach_RightMtrSpeed(100);
-                    }
-                    else if (event == FRONT_RIGHT_BUMP_PRESSED)
-                    {
-                        Roach_LeftMtrSpeed(100);
-                        Roach_RightMtrSpeed(0);
-                    }
-                    
-                    if (Roach_ReadFrontLeftBumper() && Roach_ReadFrontRightBumper())
-                    {
+                     if (!leftPressedFirst && event == FRONT_LEFT_BUMP_PRESSED){
+//                        printf("HERE");
+//                        MOV_initFwd(-20);
+//                        substate_state = Reverse;
                         current_state = Orienting;
-                        MOV_initTurn(135);
+                        MOV_initTurn(145);
                     }
+                    else if (leftPressedFirst && event == FRONT_RIGHT_BUMP_PRESSED)
+                    {
+//                        printf("HERE");
+//                        MOV_initFwd(-20);
+//                        substate_state = Reverse;
+                        current_state = Orienting;
+                        MOV_initTurn(145);
+                    }                   
 
                     break;
             }
@@ -178,23 +192,23 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             printf("Orienting");
             if (MOV_isTurnFinished()) {
                 current_state = Driving;
-                MOV_initFwd(20);
+                MOV_initFwd(12);
             } else{
                 int newMotorSpeed = MOV_updateTurn();
-                Roach_LeftMtrSpeed(newMotorSpeed);
-                Roach_RightMtrSpeed(newMotorSpeed);
+                Roach_LeftMtrSpeed(-newMotorSpeed);
+                Roach_RightMtrSpeed(-newMotorSpeed);
             }
             break;
         case Driving:
             printf("Driving");
             if (MOV_isFwdFinished()){
-                current_state= Finish;
                 Roach_LeftMtrSpeed(0);
                 Roach_RightMtrSpeed(0);
+                current_state= Finish;
             }else{
                 int newMotorSpeed =  MOV_updateFwd();
                 Roach_LeftMtrSpeed(newMotorSpeed);
-                Roach_RightMtrSpeed(newMotorSpeed);
+                Roach_RightMtrSpeed(-newMotorSpeed);
             }
             break;
         case Finish:
