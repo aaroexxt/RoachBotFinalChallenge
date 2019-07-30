@@ -93,7 +93,7 @@ int main(void)
     
     printf("\r\n---------\r\nI2CINIT %d\r\n---------\r\n",I2C_Init());
     I2C_setDebugOff();
-    delayMS(100);
+    delayMS(2000);
     MOV_initTurn(180);
 
     //first, setup the framework:
