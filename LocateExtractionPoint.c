@@ -81,7 +81,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     if (MOV_isTurnFinished()) {
                        substate_state = DriveForward;
                        Roach_LeftMtrSpeed(70);
-                       Roach_RightMtrSpeed(-70);
+                       Roach_RightMtrSpeed(70);
                     } else{
                         int newMotorSpeed = MOV_updateTurn();
                         Roach_LeftMtrSpeed(-newMotorSpeed);
@@ -92,7 +92,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
 //                    printf("DriveForward");
                     if (event == FRONT_LEFT_BUMP_PRESSED) {
                         Roach_LeftMtrSpeed(0);
-                        Roach_RightMtrSpeed(-100);
+                        Roach_RightMtrSpeed(100);
                         leftPressedFirst = 1;
                         substate_state = TurnToWall1;
                     } else if(event == FRONT_RIGHT_BUMP_PRESSED){
@@ -133,7 +133,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     }else{
                         int newMotorSpeed =  MOV_updateFwd();
                         Roach_LeftMtrSpeed(newMotorSpeed);
-                        Roach_RightMtrSpeed(-newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
                     }
                     break;
                 case TurnNinety:
@@ -145,7 +145,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     }else{
                         int newMotorSpeed = MOV_updateTurn();
                         Roach_LeftMtrSpeed(-newMotorSpeed);
-                        Roach_RightMtrSpeed(-newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
                     }
                     break;
                 case DriveToCorner:
@@ -153,7 +153,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
 
                     if (event == FRONT_LEFT_BUMP_PRESSED) {
                         Roach_LeftMtrSpeed(0);
-                        Roach_RightMtrSpeed(-100);
+                        Roach_RightMtrSpeed(100);
                         leftPressedFirst = 1;
                         substate_state = TurnToWall2;
                     } else if(event == FRONT_RIGHT_BUMP_PRESSED){
@@ -196,7 +196,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             } else{
                 int newMotorSpeed = MOV_updateTurn();
                 Roach_LeftMtrSpeed(-newMotorSpeed);
-                Roach_RightMtrSpeed(-newMotorSpeed);
+                Roach_RightMtrSpeed(newMotorSpeed);
             }
             break;
         case Driving:
@@ -208,7 +208,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             }else{
                 int newMotorSpeed =  MOV_updateFwd();
                 Roach_LeftMtrSpeed(newMotorSpeed);
-                Roach_RightMtrSpeed(-newMotorSpeed);
+                Roach_RightMtrSpeed(newMotorSpeed);
             }
             break;
         case Finish:
