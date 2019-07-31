@@ -17,10 +17,10 @@
 #include "roach.h"
 #include "timers.h"
 #include "Roach_Top_Level_SM.h"
-#include "JAADMain.h"
 #include "JAADI2CLib.c"
 #include "JAADMOVLib.c"
 #include "JAADIOLib.c"
+#include "LocateExtractionPoint.h"
 #include "Roach_Events.h"
 
 

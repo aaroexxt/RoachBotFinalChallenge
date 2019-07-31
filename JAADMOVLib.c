@@ -113,8 +113,8 @@ void MOV_initFwd(int distance){
     prevClockTime = TIMERS_GetTime();
         int i = 0;
 
-    for(i = 0; i < 32; i++){
-        data = I2C_getGyroData();
+    for(i = 0; i < 33; i++){
+        fwdData = I2C_getAccelData();
     }
 }
 

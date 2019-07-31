@@ -192,7 +192,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             printf("Orienting");
             if (MOV_isTurnFinished()) {
                 current_state = Driving;
-                MOV_initFwd(12);
+                MOV_initFwd(18);
             } else{
                 int newMotorSpeed = MOV_updateTurn();
                 Roach_LeftMtrSpeed(-newMotorSpeed);
