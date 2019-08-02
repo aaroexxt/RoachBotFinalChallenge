@@ -58,7 +58,9 @@ void Initialize_LocateExtractionPoint_StateMachine(void)
    current_state = Aligning;
    substate_state = DriveForward;
    Roach_LeftMtrSpeed(70);
-   Roach_RightMtrSpeed(-70);
+   Roach_RightMtrSpeed(70);
+//   MOV_initFwd(8);
+   
 //   MOV_initTurn(-45);
 //     MOV_initFwd(-20);
 };
@@ -85,7 +87,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     } else{
                         int newMotorSpeed = MOV_updateTurn();
                         Roach_LeftMtrSpeed(-newMotorSpeed);
-                        Roach_RightMtrSpeed(-newMotorSpeed);
+                        Roach_RightMtrSpeed(newMotorSpeed);
                     }
                     break;
                 case DriveForward:
@@ -141,7 +143,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
                     if (MOV_isTurnFinished()) {
                         substate_state = DriveToCorner;
                         Roach_LeftMtrSpeed(70);
-                        Roach_RightMtrSpeed(-70);
+                        Roach_RightMtrSpeed(70);
                     }else{
                         int newMotorSpeed = MOV_updateTurn();
                         Roach_LeftMtrSpeed(-newMotorSpeed);
@@ -192,7 +194,7 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             printf("Orienting");
             if (MOV_isTurnFinished()) {
                 current_state = Driving;
-                MOV_initFwd(18);
+                MOV_initFwd(2);
             } else{
                 int newMotorSpeed = MOV_updateTurn();
                 Roach_LeftMtrSpeed(-newMotorSpeed);
@@ -200,11 +202,13 @@ Event Run_Roach_LocateExtractionPoint_StateMachine(Event event) {
             }
             break;
         case Driving:
-            printf("Driving");
+//            delayMS(100);
+//            printf("Driving");
             if (MOV_isFwdFinished()){
+                printf("HERE");
                 Roach_LeftMtrSpeed(0);
                 Roach_RightMtrSpeed(0);
-                current_state= Finish;
+                current_state = Finish;
             }else{
                 int newMotorSpeed =  MOV_updateFwd();
                 Roach_LeftMtrSpeed(newMotorSpeed);
